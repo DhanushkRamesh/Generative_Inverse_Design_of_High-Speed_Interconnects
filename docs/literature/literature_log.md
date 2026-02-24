@@ -7,16 +7,18 @@
 **Project:** ML-Based Surrogate Model For Signal Integrity
 
 
-| Date | Database | Search Terms | Results | Useful Hits |
-| :--- | :--- | :--- | :--- | :--- |
-| 30-11-2025 | IEEE Xplore | "integrated circuit modelling" AND "signal Integrity applications" AND "Neural Networks" | 27 | 1 (Akinwande et al.) |
-| 03-12-2025 | IEEE Xplore | "high-density interconnects" AND "machine learning" | 43 | 1 (Sreekumar & Gupta) |
-| 07-01-2026 | Google Scholar | "physics-informed" AND "interconnects" | 1600 | 3 (Garbuglia et al.) (J. Fan et al) (T. -L. Wu et al.) |
-| 12-01-2026 | Research Gate | "PCB manufacturing" AND "Impedance" AND "Variation" | 540 | 1 (Abdelghani Renbi et al.) |
-| 14-01-2026 | IEEE Xplore | "signal and power integrity" AND "channel modeling" | 2 | 1 (Juhitha Konduru et al.) |
-| 21-01-2026 | IEEE Xplore | "SI/PI Database" AND "Machine Learning" | 7 | 1 (Morten Schierholz et al.) |
-| 05-02-2026 | IEEE Xplore | "inverse design" AND "Neural Network" AND "channel" | 24 | 1 (Hanzhi Ma et al.) |
-| 07-02-2026 | arxiv  | "inverse problems" AND "Deep Learning" | 8 | 1 (Jaweria Amjad et al.) |
+| Date       | Database       | Search Terms                                                                                                 | Results | Useful Hits                                            |
+| :--------- | :------------- | :----------------------------------------------------------------------------------------------------------- | :------ | :----------------------------------------------------- |
+| 30-11-2025 | IEEE Xplore    | "integrated circuit modelling" AND "signal Integrity applications" AND "Neural Networks"                     | 27      | 1 (Akinwande et al.)                                   |
+| 03-12-2025 | IEEE Xplore    | "high-density interconnects" AND "machine learning"                                                          | 43      | 1 (Sreekumar & Gupta)                                  |
+| 07-01-2026 | Google Scholar | "physics-informed" AND "interconnects"                                                                       | 1600    | 3 (Garbuglia et al.) (J. Fan et al) (T. -L. Wu et al.) |
+| 12-01-2026 | Research Gate  | "PCB manufacturing" AND "Impedance" AND "Variation"                                                          | 540     | 1 (Abdelghani Renbi et al.)                            |
+| 14-01-2026 | IEEE Xplore    | "signal and power integrity" AND "channel modeling"                                                          | 2       | 1 (Juhitha Konduru et al.)                             |
+| 21-01-2026 | IEEE Xplore    | "SI/PI Database" AND "Machine Learning"                                                                      | 7       | 1 (Morten Schierholz et al.)                           |
+| 05-02-2026 | IEEE Xplore    | "inverse design" AND "Neural Network" AND "channel"                                                          | 24      | 1 (Hanzhi Ma et al.)                                   |
+| 07-02-2026 | arxiv          | "inverse problems" AND "Deep Learning"                                                                       | 8       | 1 (Jaweria Amjad et al.)                               |
+| 11-02-1026 | arxiv          | Deep Learning AND "regularization techniques" AND "generalization gap" OR "classification margin"            | 41      | 2 (Judy Hoffman et al.), (Maya Janvier et al.)         |
+| 14-02-1026 | arxiv          | "Conditional Variational Autoencoder" AND "Tandem Network" AND "Inverse Design" AND "physical realizability" | 1       | 1(Yuxiao Li et al.)                                    |
 
 
 
@@ -24,7 +26,7 @@
 ## 2. Log of Articles Reviewed
 
 
-### 1. Core reference paper
+### 1. Reference paper for building the proposal
 **Citation:**
 O. Akinwande, S. Erdogan, R. Kumar and M. Swaminathan, "Surrogate Modeling With Complex-Valued Neural Nets for Signal Integrity Applications," in IEEE Transactions on Microwave Theory and Techniques, vol. 72, no. 1, pp. 478-489, Jan. 2024, doi: 10.1109/TMTT.2023.3319835. 
 **Key Findings:**
@@ -82,7 +84,7 @@ In this paper the model addresses only the forward path and no Inverse model is 
 **Relevance**
 This paper provide a reference for improving the architecture for the forward model where the 1-D CNN can be adapted to build the tandem loop to detect the small signal deviations caused by manufaturing defects.
 
-### 7. Convolution Nets for Forward Modeling
+### 7. Convolution Nets for Forward Modeling (used as reference for supporting the state-of-the-art forward simulation)
 **Citation**
 J. Konduru, O. Mikulchenko, L. Y. Foo and J. E. Schutt-Ainé, "Signal Integrity Analysis and Design Optimization using Neural Networks," _2024 IEEE 74th Electronic Components and Technology Conference (ECTC)_, Denver, CO, USA, 2024, pp. 924-928, doi: 10.1109/ECTC51529.2024.00150.
 
@@ -123,7 +125,7 @@ The model just assume the forward model without any optimization wihtout any cir
 **Relevance**
 This Tandem Neural Net model cn be adapted as baseline where we can inprovise the architecture further for our model.
 
-### 10. Algorrithm exploration
+### 10. Jacobian Loss Function (reference)
 **Citation**
 J. Amjad, Z. Lyu, and M. R. D. Rodrigues, "Deep Learning for Inverse Problems: Bounds and Regularizers," in arXiv preprint arXiv:1901.11352, 2019.
 
@@ -135,6 +137,41 @@ This provides the theorem connecting Jacobian size to the generelazation errors
 
 **Relevance**
 Even though the core concept is focused on image reconstruction, the Jacobian regularization conceept can be adapted to apply in PCB manufacturing yield.
+
+### 11. Jacobian Loss Function (foundation)
+**Citation**
+Judy Hoffman et al., “Robust Learning with Jacobian Regularization”, 
+https://doi.org/10.48550/arXiv.1908.02729](https://doi.org/10.48550/arXiv.1908.02729)
+
+**Key Findings**
+The authors by introducing an efficient approximation algorithm using random projections, they try to resolve the traditional computational bottleneck of Jacobian calculation. This reduces the computational overhead.
+
+**Strength**
+This paper proves that Jacobian regularization pushes the decision boundaries outwards to find the flatter and more stable prediction spaces. This is mathematically rigorous and computationally efficient method. 
+
+**Weakness**
+This methodology is fundamentally tested and framed in computer vison. We will implement in high-speed interconnects to explore inverse design problems.
+
+**Relevance**
+This paper provides the fundamental reference to use Jacobian Yield to focus on yield-aware inverse model. We use Jacobian regularization to defend the cVAE against manufacturing tolerances. 
+
+### 12. Variational Autoencoders (reference and inspiration)
+**Citation**
+Yuxiao Li, Taeyoon Kim, Allen Zhang, Zengbo Wang, Yongmin Liu,"On-Demand Inverse Design for Narrowband Nanophotonic Structures Based on Generative Model and Tandem Network",https://doi.org/10.48550/arXiv.2507.14761.
+
+**Key Findings**
+This paper uses conditional variational autoencoders to filter user input before they connect to the tandem network. The idealized target spectrum is taken by the cVAE and modified into cVAE adjusted target spectrum. This adjusted spectrum reduces the prediction errors and hence solve the inverse problem - one-to-many problem.
+
+**Strength**
+It prevents the deterministic inverse network from crashing and solves the issue of hallucination. 
+
+**Weakness**
+This framework is not explored much in signal integrity applications. It is applied in optical nano photonics. 
+
+**Relevance**
+This papers shows the architectural framework for the generative inverse design used in our project. We take this foundation model and build it to solve one-to-many problem.
+
+
 
 
 

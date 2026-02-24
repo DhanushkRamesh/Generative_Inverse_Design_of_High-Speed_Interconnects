@@ -1,33 +1,39 @@
 
 Slide 1: The Hook
 
-Image idea: 
+Image idea: [To add a clean 112G eye diagram on left, a failed eye diagram on right with a PCB drill in the middle depicting a slight tolerance will have a failure in yield. (one of the main focus of our project)]
 
-Imagine building a F1 car that breaks if the wind changes by 1 mile per hour. This is the case in the high-speed circuit design today.
+Imagine building an F1 car that loses balance if the wind changes by 1 mile per hour. That is the reality of high-speed circuit design today.
 
-As we are moving to 112G data rates, the electrical signals are so sensitive that a microscopic error while manufacturing - say a drill bit going 10% deep, can destroy the signal integrity of the PCB.
+As we move to 112G data rates, the margins for error shrink drastically. At these speeds, a microscopic manufacturing variation—say, a drill bit going just 10% too deep—can severely degrade the signal integrity of the PCB.
 
-The problem is most of the current state-of -the-art AI models focus only on accuracy finding single optimal design point. These work perfectly in computer simulations but fails when it hits the factory floor even if there is minor tolerances. While the industry has mastered the forward simulation, robust inverse design remains largely unsolved. 
+Currently, ensuring yield requires running thousands of slow Monte Carlo simulations in traditional CAD tools. Meanwhile, state-of-the-art AI models try to replace this, but they entirely focus on finding mathematically optimal design prioritizing pure accuracy. These models work perfectly in ideal, zero-variance simulations but may fail in the factory if the manufacturing variances are not taken into account.
 
-My project challenges this by asking: _Can we build an AI that doesn't just design for 'Performance', but designs for 'Manufacturability' and 'Physics'?_"
+While the industry has mastered the forward simulation, robust inverse design remains largely unsolved. 
+
+My project challenges this by asking: "Can we build an AI model that designs for both performance (accuracy) and also high manufacturing yield?"
 
 Slide 2:  Proposed Solution
 
-We propose a novel framework - the yield focused Tandem-VAE network that moves beyond standard Deep Learning by integrating three specific innovations,
+Image idea: ["Yield-Tandem VAE" Architecture Diagram. Highlight 3 blocks: The VAE (Generator), The Rational Layer (Physics), and the Jacobian Loss (Robustness).]
 
-First, to solve the one-to-many problem - where multiple geometries can produce the same signal. We use conditional Variational Autoencoders (cVAE) - unlike standard regression model that output a single average design, we generate a distribution of valid geometries for the engineers to choose from. 
+We propose a novel framework - the yield Tandem-VAE. This architecture moves beyond standard Deep Learning by integrating three specific innovations.
 
-Second, to enforce physics. We introduce a Differentiable Rational Layer, replacing the computationally heavy complex penalty functions to enforce physics (causality). Our network predicts poles and residues, instead of raw data points. This mathematically guarantees that every generated design obeys Kramers-Kronig causality, hence preventing the AI from hallucinating. 
+First, to solve the one-to-many problem - where multiple geometries can produce the same signal. We use conditional Variational Autoencoders (cVAE) - unlike standard regression models that output a single average design, we generate a distribution of valid geometries for the engineers to choose from. 
 
-Third, and most importantly, we are introducing a Jacobian Yield Loss, inspired from Scientific Machine Learning, and also mostly used in Computer Vision applications. We use a Finite-difference approximation of the Jacobian matrix during training. This penalizes the designs that are sharp peaks where a small change leads to failure - and forces the model to find flat plateaus that is stable even with some manufacturing tolerances.
+Second, to enforce physics. We introduce a Differentiable Rational Layer, instead of predicting raw data points using computationally heavy complex penalty functions, our network predicts poles and residues. This mathematically guarantees that every generated design obeys Kramers-Kronig causality, preventing the AI from generating non-physical outputs or hallucinating. 
+
+Third, and most importantly, we introduce a Jacobian Yield Loss. By using a finite-difference approximation of the Jacobian matrix during training, we penalize designs that sit on sharp peaks in the loss landscape—where a small manufacturing change leads to failure. Instead, this forces the model to find flat plateaus that are completely stable, even with manufacturing tolerances."
 
 Slide 3: Why it matters
 
-Why does this matter? Because in hardware industry, Yield is the King!
+image idea: [A chart comparing "Standard AI Yield (50%)" vs. "Ours (90%)". A bullet point list: "1. Guaranteed Causality. 2. Factory-Ready Designs. 3. 1000x Speedup". A compelling data visualization. Which uses probability distributions to contrast the "risky" nature of standard AI with the "robust" nature of my solution, directly supporting the "Yield is King" message.]
 
-The design that works in simulation and fails in the factory cost millions in re-spins. Also, most of the standard inverse papers ignore yield.  Our work bridges the gap between academic AI and industrial reality.
+Why does this matter? Because in the hardware industry, Yield is King!
 
-By optimizing the Jacobian, we guarantee that the designs will be robust and by enforcing rational layer the engineers know that the AI isn't violating physics. 
+The design that works in simulation and fails in the factory cost millions in re-spins. Furthermore, most of the standard inverse papers ignore yield entirely.  Our work bridges the gap between academic AI and industrial reality.
 
-This ultimately moves from using AI as a simple calculator to using it as a physics aware co-designer that can accelerate the design development from weeks of simulation to milliseconds of interface.
+By optimizing the Jacobian, we guarantee that the designs will be robust to manufacturing tolerances. And by enforcing the rational layer, engineers know the AI is not violating physical laws.
+
+Ultimately, this transforms AI from being a simple calculator into a physics-aware co-designer—accelerating development from weeks of simulation down to mere milliseconds of inference."
 
