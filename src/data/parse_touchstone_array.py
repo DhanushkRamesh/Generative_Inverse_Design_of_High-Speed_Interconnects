@@ -49,35 +49,40 @@ def parse_touchstone_array(base_dir, output_dir):
             #load the network from the touchstone file
             network = rf.Network(touchstone_file)
             #extract the s-parameters and reshape to (4,4,201)
-            core_s_matrix=network.s[:,0:4,0:4]
+            #dynamic port extraction based on the number of ports in the touchstone file, but we will only take the core 4x4 for the dataset
+            num_ports=network.s.shape[1]
+            half=num_ports//2
+            #grab indicies for TX+,TX- (0,1) and RX+,RX- (half, half+1)
+            idx = [0, 1, half, half+1]
+            #dynamically extract the core 4x4 s-parameter matrix based on the identified indices
+            core_s_matrix=network.s[:, idx, :][:, :, idx]
             s_matrix_real= torch.tensor(np.real(core_s_matrix), dtype=torch.float32)
             s_matrix_imag= torch.tensor(np.imag(core_s_matrix), dtype=torch.float32)
             Y_real_list.append(s_matrix_real)
             Y_imag_list.append(s_matrix_imag)
             valid_indexes.append(idx)
 
-            #testing it for first 50 simulations
-            if len(valid_indexes) >= 50:
-                print("Extracted s-parameters for 50 simulations, stopping further extraction for testing.")
-                break
         except Exception as e:
             print(f"Error processing Touchstone file for simulation ID {sim_id}: {e}")
             continue
-        #Finilize tensors
-        X_final = X_tensor[valid_indexes]
-        Y_real=torch.stack(Y_real_list)
-        Y_imag=torch.stack(Y_imag_list)
-        #save the tensors
-        os.makedirs(output_dir, exist_ok=True)
-        save_path = os.path.join(output_dir, "via_array_dataset.pt")
+    #Finilize tensors
+    if not valid_indexes:
+        print("Error: No valid Touchstone files were processed. Please check the dataset and file paths.")
+        return
+    X_final = X_tensor[valid_indexes]
+    Y_real=torch.stack(Y_real_list)
+    Y_imag=torch.stack(Y_imag_list)
+    #save the tensors
+    os.makedirs(output_dir, exist_ok=True)
+    save_path = os.path.join(output_dir, "via_array_dataset.pt")
 
-        torch.save({
-            'X': X_final,
-            'Y_real': Y_real,
-            'Y_imag': Y_imag,
-            'feature_names': feature_names,
-            'frequencies':torch.tensor(network.f, dtype=torch.float32)
-        }, save_path)
+    torch.save({
+        'X': X_final,
+        'Y_real': Y_real,
+        'Y_imag': Y_imag,
+        'feature_names': feature_names,
+        'frequencies':torch.tensor(network.f, dtype=torch.float32)
+    }, save_path)
     print(f"Dataset saved to {save_path}")
     print(f"Final dataset shapes - X: {X_final.shape}, Y_real: {Y_real.shape}, Y_imag: {Y_imag.shape} (frequency points, 4, 4)")
 
