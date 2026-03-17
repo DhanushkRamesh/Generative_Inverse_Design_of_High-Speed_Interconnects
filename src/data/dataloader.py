@@ -76,6 +76,16 @@ def get_dataloaders(data_path, dataset_type='link', batch_size=32, train_split=0
 if __name__ == "__main__":
     #point to the preprocessed dataset (make sure to update the path if needed)
     test_path = os.path.expanduser("~/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/data/processed/Universal-Diff-SI-Link/via_link_dataset.pt")
+    
+    # Load raw to check metadata
+    checkpoint = torch.load(test_path, weights_only=True)
+    print(f"📦 Metadata Check: {list(checkpoint.keys())}")
+    
+    if 'X_min' in checkpoint:
+        print(f"Success! Min/Max scalers found.")
+        print(f"Found {len(checkpoint['sim_ids'])} Simulation IDs for traceability.")
+    else:
+        print(f"Warning: Metadata missing. Did you overwrite the .pt with the new parser?")
     #grab the loaders
     train_loader, val_loader, test_loader = get_dataloaders(test_path, dataset_type='link', batch_size=32)
     #grab one batch from the training loader to verify the shapes and contents

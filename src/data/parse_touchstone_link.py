@@ -20,6 +20,16 @@ def parse_touchstone_link(base_dir, output_dir):
 
     sim_ids = df['SIMULATION'].values
     features = df.drop(columns=['SIM_ID', 'SIMULATION'])
+    #track log-scalling for inverser design correction later
+    log_features = []
+    #Convert exponential material properties to linear scale for better training stability
+    if 'CONDUCTIVITY' in features.columns:
+        features['CONDUCTIVITY'] = np.log10(features['CONDUCTIVITY'])
+        log_features.append('CONDUCTIVITY')
+    if 'LOSSTANGENT' in features.columns:
+        features['LOSSTANGENT'] = np.log10(features['LOSSTANGENT'])
+        log_features.append('LOSSTANGENT')
+
     feature_names = features.columns.tolist()
     feature_values = features.values
     #min-max scaling of the features
@@ -35,6 +45,7 @@ def parse_touchstone_link(base_dir, output_dir):
     Y_real_list = []
     Y_imag_list = []
     valid_indexes = []
+    valid_sim_ids = [] # Traceability
     print(f"extracting s-parameters for {len(sim_ids)} simulations...")
 
     for idx, sim_id in tqdm(enumerate(sim_ids), total=len(sim_ids)):
@@ -55,15 +66,16 @@ def parse_touchstone_link(base_dir, output_dir):
             num_ports=network.s.shape[1]
             half=num_ports//2
             #grab indicies for TX+,TX- (0,1) and RX+,RX- (half, half+1)
-            idx = [0, 1, half, half+1]
+            port_idx = [0, 1, half, half+1]
             #dynamically extract the core 4x4 s-parameter matrix based on the identified indices
-            core_s_matrix=network.s[:, idx, :][:, :, idx]
+            core_s_matrix=network.s[:, port_idx, :][:, :, port_idx]
 
             s_matrix_real= torch.tensor(np.real(core_s_matrix), dtype=torch.float32)
             s_matrix_imag= torch.tensor(np.imag(core_s_matrix), dtype=torch.float32)
             Y_real_list.append(s_matrix_real)
             Y_imag_list.append(s_matrix_imag)
             valid_indexes.append(idx)
+            valid_sim_ids.append(sim_id) # Save the ID
 
         except Exception as e:
             print(f"Error processing Touchstone file for simulation ID {sim_id}: {e}")
@@ -79,14 +91,22 @@ def parse_touchstone_link(base_dir, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     save_path = os.path.join(output_dir, "via_link_dataset.pt")
 
+    #save everything including tensors and metadata for traceability and future analysis
     torch.save({
+        #training data
         'X': X_final,
         'Y_real': Y_real,
         'Y_imag': Y_imag,
         'feature_names': feature_names,
-        'frequencies':torch.tensor(network.f, dtype=torch.float32)
+        'frequencies':torch.tensor(network.f, dtype=torch.float32),
+        #metadata for traceability
+        'sim_ids': valid_sim_ids, #for design traceability
+        'X_min': torch.tensor(X_min), #for inverse design rescaling
+        'X_max': torch.tensor(X_max), #for inverse design rescaling
+        'log_features': log_features #to remember which features were log-scaled for inverse design correction
     }, save_path)
     print(f"Dataset saved to {save_path}")
+    print(f"Metadata included for {len(valid_sim_ids)} simulations.")
     print(f"Final dataset shapes - X: {X_final.shape}, Y_real: {Y_real.shape}, Y_imag: {Y_imag.shape} (frequency points, 4, 4)")
 
 if __name__ == "__main__":
