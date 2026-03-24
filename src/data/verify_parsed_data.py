@@ -1,29 +1,35 @@
+# src/data/verify_parsed_data.py
 import torch
 import skrf as rf
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import random
+import sys
+
+# utils for physics conversions
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.physics_utils import convert_to_mixed_mode, enforce_reciprocity, s_to_db, unscale_tensor
 
 def verify_dataset(pt_path, raw_base_dir):
     print(f"Loading processed dataset: {pt_path}")
-    data = torch.load(pt_path, weights_only=True)
+    data = torch.load(pt_path, weights_only=False)
     
-    # 1. Pick a random index to verify
+    # Pick a random index to verify
     total_samples = data['X'].shape[0]
     idx = random.randint(0, total_samples - 1)
     sim_id = data['sim_ids'][idx]
     
     print(f"Verifying Index: {idx} | Simulation ID: {sim_id}")
 
-    # 2. Reconstruct Tensor Data
-    # Convert [-1, 1] back to complex S-parameters
+    # Reconstruct Tensor Data
+    # Our processed tensors are already in Mixed-Mode!
     freqs = data['frequencies'].numpy()
     Y_real = data['Y_real'][idx].numpy()
     Y_imag = data['Y_imag'][idx].numpy()
-    S_tensor = Y_real + 1j * Y_imag
+    S_tensor_mm = Y_real + 1j * Y_imag
     
-    # 3. Load Raw Ground Truth
+    #Load Raw Ground Truth
     # Use the sim_id to find the folder
     search_path = os.path.join(raw_base_dir, "variation", sim_id, "*.s*p")
     import glob
@@ -35,45 +41,50 @@ def verify_dataset(pt_path, raw_base_dir):
 
     ntwk_raw = rf.Network(raw_files[0])
     
-    # 4. Apply the same Slicing Logic used in Parser
+    # Apply the same Slicing Logic used in Parser
     num_ports = ntwk_raw.number_of_ports
     half = num_ports // 2
     port_idx = [0, 1, half, half+1]
     
-    # Extract the same 4x4 from the raw high-port network
-    ntwk_raw_4x4 = ntwk_raw.s[:, port_idx, :][:, :, port_idx]
+    # Extract the same 4x4 from the raw high-port network (Single-Ended)
+    ntwk_raw_4x4_se = ntwk_raw.s[:, port_idx, :][:, :, port_idx]
+    # enforce reciprocity to kill numerical noise before conversion exactly what was done in the parser
+    ntwk_raw_4x4_se = enforce_reciprocity(ntwk_raw_4x4_se)
+    # 5. Convert Raw Data to Mixed-Mode for a fair 1-to-1 comparison
+    ntwk_raw_4x4_mm = convert_to_mixed_mode(ntwk_raw_4x4_se)
 
-    # 5. Plotting Comparison (S11 and S21)
+    # 6. Plotting Comparison (Sdd11 and Sdd21)
     plt.figure(figsize=(12, 5))
     
-    # Port 1 to Port 1 (Return Loss)
+    # Differential Return Loss (Sdd11) -> Index [:, 0, 0]
     plt.subplot(1, 2, 1)
-    plt.plot(ntwk_raw.f/1e9, 20*np.log10(np.abs(ntwk_raw_4x4[:, 0, 0])), 'r-', label='Raw Ground Truth', linewidth=3, alpha=0.5)
-    plt.plot(freqs/1e9, 20*np.log10(np.abs(S_tensor[:, 0, 0])), 'k--', label='Tensor Reconstruction')
-    plt.title(f'Return Loss (S11) - {sim_id}')
+    plt.plot(ntwk_raw.f/1e9, s_to_db(ntwk_raw_4x4_mm[:, 0, 0]), 'r-', label='Raw (Converted to MM)', linewidth=3, alpha=0.5)
+    plt.plot(freqs/1e9, s_to_db(S_tensor_mm[:, 0, 0]), 'k--', label='Tensor Reconstruction')
+    plt.title(f'Diff Return Loss (Sdd11) - {sim_id}')
     plt.ylabel('Magnitude (dB)'); plt.xlabel('Frequency (GHz)')
     plt.grid(True); plt.legend()
 
-    # Port 1 to Port 3 (Insertion Loss / Through Path)
-    # Note: Port 3 in our 4x4 matrix corresponds to 'half' in the raw matrix
+    # Differential Insertion Loss (Sdd21) -> Index [:, 1, 0]
     plt.subplot(1, 2, 2)
-    plt.plot(ntwk_raw.f/1e9, 20*np.log10(np.abs(ntwk_raw_4x4[:, 2, 0])), 'b-', label='Raw Ground Truth', linewidth=3, alpha=0.5)
-    plt.plot(freqs/1e9, 20*np.log10(np.abs(S_tensor[:, 2, 0])), 'k--', label='Tensor Reconstruction')
-    plt.title(f'Insertion Loss (S31) - {sim_id}')
+    plt.plot(ntwk_raw.f/1e9, s_to_db(ntwk_raw_4x4_mm[:, 1, 0]), 'b-', label='Raw (Converted to MM)', linewidth=3, alpha=0.5)
+    plt.plot(freqs/1e9, s_to_db(S_tensor_mm[:, 1, 0]), 'k--', label='Tensor Reconstruction')
+    plt.title(f'Diff Insertion Loss (Sdd21) - {sim_id}')
     plt.ylabel('Magnitude (dB)'); plt.xlabel('Frequency (GHz)')
     plt.grid(True); plt.legend()
 
     plt.tight_layout()
     plt.show()
 
-    # 6. Geometric Verification (Optional but Recommended)
+    # 7. Geometric Verification
     radius_idx = data['feature_names'].index('VIA_RADIUS')
     scaled_radius = data['X'][idx, radius_idx].item()
     
-    # Un-scale: Normalized [-1, 1] -> Physical
-    r_min = data['X_min'][radius_idx].item()
-    r_max = data['X_max'][radius_idx].item()
-    physical_radius = ((scaled_radius + 1) / 2) * (r_max - r_min) + r_min
+    # Un-scale: Z-score normalization reversal - > physical_value = (scaled_value * std) + mean
+    physical_radius = unscale_tensor(
+        scaled_radius, 
+        data['X_mean'][radius_idx], 
+        data['X_std'][radius_idx]
+    ).item()
     
     print(f"Geometry Check (VIA_RADIUS):")
     print(f"   - Tensor (Unscaled): {physical_radius:.4f}")

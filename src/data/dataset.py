@@ -9,8 +9,13 @@ class SIPIDataset(Dataset):
     """
     def __init__(self,data_path,dataset_type='link'):
         #load the prepocessed tensors from the specified directory
-        data=torch.load(data_path, weights_only=True)
+        data=torch.load(data_path, weights_only=False) #load the full dataset with metadata for traceability and inverse design rescaling
         self.feature_names=data['feature_names']
+
+        #store scaling metrics and frequencies for inverse design rescaling
+        self.X_mean = data['X_mean']
+        self.X_std = data['X_std']
+        self.frequencies = data['frequencies']
         
         #define the target names for the local parameters (What the AI generates)
         self.local_features=[
@@ -23,7 +28,7 @@ class SIPIDataset(Dataset):
         # Define the conditions (Constraints given to the AI - Global Features)
         self.global_features=[
             'VIAS_X_AMOUNT', 'VIAS_Y_AMOUNT', 'SIGNAL_AMOUNT', 
-            'GROUND_AMOUNT', 'POWER_AMOUNT'
+            'GROUND_AMOUNT', 'POWER_AMOUNT', 'LAYER_AMOUNT', 'NUM_PORTS' #added num_ports as a global feature for the AI to learn array density variance as a global constraint. This is important for the model to understand how the number of ports affects the performance and to be able to generalize across different array densities.
         ]
         if dataset_type=='link':
             self.global_features.extend(['LENGTH']) #trace length is a global constraint for the AI to meet
@@ -75,22 +80,42 @@ def get_dataloaders(data_path, dataset_type='link', batch_size=32, train_split=0
 #Test to verify batch samples
 if __name__ == "__main__":
     #point to the preprocessed dataset (make sure to update the path if needed)
-    test_path = os.path.expanduser("~/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/data/processed/Universal-Diff-SI-Link/via_link_dataset.pt")
-    
-    # Load raw to check metadata
-    checkpoint = torch.load(test_path, weights_only=True)
-    print(f"📦 Metadata Check: {list(checkpoint.keys())}")
-    
-    if 'X_min' in checkpoint:
-        print(f"Success! Min/Max scalers found.")
-        print(f"Found {len(checkpoint['sim_ids'])} Simulation IDs for traceability.")
-    else:
-        print(f"Warning: Metadata missing. Did you overwrite the .pt with the new parser?")
-    #grab the loaders
-    train_loader, val_loader, test_loader = get_dataloaders(test_path, dataset_type='link', batch_size=32)
-    #grab one batch from the training loader to verify the shapes and contents
-    X_loc_batch, X_glob_batch, Y_real_batch, Y_imag_batch = next(iter(train_loader))
-    print("\nSUCCESS! Scientifically Valid Batch Shapes:")
-    print(f"Targets (X_local): {X_loc_batch.shape}  -> (Batch, Local Features)")
-    print(f"Conditions (X_global): {X_glob_batch.shape}  -> (Batch, Global Constraints)")
-    print(f"S-Params (Y_real): {Y_real_batch.shape} -> (Batch, Freqs, Ports, Ports)")
+    PROJ_ROOT = os.path.expanduser("~/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects")
+    dataset_to_test = [
+        ('array', 'Universal-Diff-SI-Array/via_array_dataset.pt'),
+        ('link',  'Universal-Diff-SI-Link/via_link_dataset.pt')
+    ]
+
+    for dataset_type, filename in dataset_to_test:
+        print(f"\n{'='*50}")
+        print(f"Testing {dataset_type.upper()} dataset")
+        test_path = os.path.join(PROJ_ROOT, "data/processed", filename)
+
+        try:
+            # Load raw to check metadata FIRST
+            checkpoint = torch.load(test_path, weights_only=False)
+            print(f"Metadata Check: {list(checkpoint.keys())}")
+            
+            if 'X_mean' in checkpoint:
+                print(f"Success! Z-Score scalers found.")
+                print(f"Found {len(checkpoint['sim_ids'])} Simulation IDs for traceability.")
+            else:
+                print(f"Warning: Metadata missing. Did you overwrite the .pt with the new parser?")
+
+            # Grab the loaders
+            train_loader, val_loader, test_loader = get_dataloaders(
+                test_path, 
+                dataset_type=dataset_type, 
+                batch_size=32
+            )
+            
+            # Grab one batch to verify shapes
+            X_loc, X_glob, Y_r, Y_i = next(iter(train_loader))
+            
+            print(f"\n SUCCESS! {dataset_type.capitalize()} Batch Shapes:")
+            print(f"Targets (X_local): {X_loc.shape}  -> (Batch, Local Features)")
+            print(f"Conditions (X_global): {X_glob.shape}  -> (Batch, Global Constraints)")
+            print(f"S-Params (Y_real): {Y_r.shape} -> (Batch, Freqs, Ports, Ports)")
+            
+        except Exception as e:
+            print(f"{dataset_type.capitalize()} Dataloader failed: {e}")
