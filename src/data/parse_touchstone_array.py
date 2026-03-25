@@ -35,12 +35,15 @@ def parse_touchstone_array(base_dir, output_dir):
     #track log-scalling for inverser design correction later
     log_features = []
     #Convert exponential material properties to linear scale for better training stability
-    if 'CONDUCTIVITY' in features.columns:
-        features['CONDUCTIVITY'] = np.log10(features['CONDUCTIVITY'].clip(lower=1e-6))
-        log_features.append('CONDUCTIVITY')
+    if 'TDIEL' in features.columns:
+        features['TDIEL'] = np.log10(features['TDIEL'].clip(lower=1e-6))
+        log_features.append('TDIEL')
     if 'LOSSTANGENT' in features.columns:
         features['LOSSTANGENT'] = np.log10(features['LOSSTANGENT'].clip(lower=1e-6))
         log_features.append('LOSSTANGENT')
+    if 'LAYER_AMOUNT' in features.columns:
+        features['LAYER_AMOUNT'] = np.log10(features['LAYER_AMOUNT'].clip(lower=1e-6))
+        log_features.append('LAYER_AMOUNT')
 
     feature_names = features.columns.tolist()
     #z-score normalization of features for better training stability

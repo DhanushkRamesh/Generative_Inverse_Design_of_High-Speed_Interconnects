@@ -39,12 +39,18 @@ def parse_touchstone_link(base_dir, output_dir):
     #track log-scalling for inverser design correction later
     log_features = []
     #Convert exponential material properties to linear scale for better training stability
-    if 'CONDUCTIVITY' in features.columns:
-        features['CONDUCTIVITY'] = np.log10(features['CONDUCTIVITY'].clip(lower=1e-6))
-        log_features.append('CONDUCTIVITY')
     if 'LOSSTANGENT' in features.columns:
         features['LOSSTANGENT'] = np.log10(features['LOSSTANGENT'].clip(lower=1e-6))
         log_features.append('LOSSTANGENT')
+    if 'SL_WIDTH' in features.columns:
+        features['SL_WIDTH'] = np.log10(features['SL_WIDTH'].clip(lower=1e-6))
+        log_features.append('SL_WIDTH')
+    if 'TDIEL' in features.columns:
+        features['TDIEL'] = np.log10(features['TDIEL'].clip(lower=1e-6))
+        log_features.append('TDIEL')
+    if 'LENGTH' in features.columns:
+        features['LENGTH'] = np.log10(features['LENGTH'].clip(lower=1e-6))
+        log_features.append('LENGTH')
 
     feature_names = features.columns.tolist()
     #z-score normalization of features for better training stability
