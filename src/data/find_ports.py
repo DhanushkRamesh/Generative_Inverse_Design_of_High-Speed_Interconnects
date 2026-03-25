@@ -37,10 +37,10 @@ def verify_multiple_port_counts(base_dir, target_port_counts):
             else:
                 plt.plot(ntwk.f / 1e9, s_mag, label=f'S_{rx_port+1}_1', alpha=0.3, linestyle='--')
 
-        # Calculate where our math THINKS the port should be
+        # Calculate where the math THINKS the port should be
         math_prediction = (num_ports // 2) + 1
         
-        plt.title(f'{ports}-Port Simulation: Signal injected at Port 1\nOur Math predicts Output is Port {math_prediction}')
+        plt.title(f'{ports}-Port Simulation: Signal injected at Port 1\n Math predicts Output is Port {math_prediction}')
         plt.xlabel('Frequency (GHz)')
         plt.ylabel('Magnitude (dB)')
         plt.ylim(-60, 5)
