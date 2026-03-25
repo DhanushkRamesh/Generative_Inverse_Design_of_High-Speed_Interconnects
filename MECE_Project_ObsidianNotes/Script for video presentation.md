@@ -1,5 +1,4 @@
 
-### **The 8-Minute Natural Pace Script**
 
 **Slide 1:  "Hello everyone. My name is Dhanush Kumar Ramesh, and today I will be presenting the status report for my project: _Yield-Aware Inverse Design of High-Speed Interconnects using a Physics-Constrained Generative Approach_. This research is being supervised by Dr. Marissa Condon. Over the next eight minutes, I will walk you through a critical industry problem, the limitations of current AI, and the novel framework I am developing to solve it." `[Pause for slide transition
 
