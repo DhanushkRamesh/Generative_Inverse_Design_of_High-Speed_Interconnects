@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<ContinuousStructure CoordSystem="0">
+    <RectilinearGrid DeltaUnit="1" CoordSystem="0">
+        <XLines Qty="0" />
+        <YLines Qty="0" />
+        <ZLines Qty="0" />
+    </RectilinearGrid>
+    <BackgroundMaterial Epsilon="1" Mue="1" Kappa="0" Sigma="0" />
+    <ParameterSet />
+    <Properties>
+        <Metal ID="0" Name="copper">
+            <FillColor R="103" G="198" B="105" a="255" />
+            <EdgeColor R="103" G="198" B="105" a="255" />
+            <Primitives>
+                <Box Priority="1">
+                    <P1 X="0.000000e+00" Y="0.000000e+00" Z="0.000000e+00" />
+                    <P2 X="1.000000e+01" Y="1.000000e+01" Z="1.000000e+01" />
+                </Box>
+            </Primitives>
+        </Metal>
+    </Properties>
+</ContinuousStructure>
