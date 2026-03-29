@@ -4,27 +4,29 @@
 
 **Supervisor:** Dr. Marissa Condon
 
-**Project:** ML-Based Surrogate Model For Signal Integrity
+**Project:** Yield-Aware Inverse Design of High-Speed Interconnects: A Physics-Constrained Generative Approach
 
 
-| Date       | Database       | Search Terms                                                                                                 | Results | Useful Hits                                            |
-| :--------- | :------------- | :----------------------------------------------------------------------------------------------------------- | :------ | :----------------------------------------------------- |
-| 30-11-2025 | IEEE Xplore    | "integrated circuit modelling" AND "signal Integrity applications" AND "Neural Networks"                     | 27      | 1 (Akinwande et al.)                                   |
-| 03-12-2025 | IEEE Xplore    | "high-density interconnects" AND "machine learning"                                                          | 43      | 1 (Sreekumar & Gupta)                                  |
-| 07-01-2026 | Google Scholar | "physics-informed" AND "interconnects"                                                                       | 1600    | 3 (Garbuglia et al.) (J. Fan et al) (T. -L. Wu et al.) |
-| 12-01-2026 | Research Gate  | "PCB manufacturing" AND "Impedance" AND "Variation"                                                          | 540     | 1 (Abdelghani Renbi et al.)                            |
-| 14-01-2026 | IEEE Xplore    | "signal and power integrity" AND "channel modeling"                                                          | 2       | 1 (Juhitha Konduru et al.)                             |
-| 21-01-2026 | IEEE Xplore    | "SI/PI Database" AND "Machine Learning"                                                                      | 7       | 1 (Morten Schierholz et al.)                           |
-| 05-02-2026 | IEEE Xplore    | "inverse design" AND "Neural Network" AND "channel"                                                          | 24      | 1 (Hanzhi Ma et al.)                                   |
-| 07-02-2026 | arxiv          | "inverse problems" AND "Deep Learning"                                                                       | 8       | 1 (Jaweria Amjad et al.)                               |
-| 11-02-1026 | arxiv          | Deep Learning AND "regularization techniques" AND "generalization gap" OR "classification margin"            | 41      | 2 (Judy Hoffman et al.), (Maya Janvier et al.)         |
-| 14-02-1026 | arxiv          | "Conditional Variational Autoencoder" AND "Tandem Network" AND "Inverse Design" AND "physical realizability" | 1       | 1(Yuxiao Li et al.)                                    |
-
-
-
+| Date       | Database             | Search Terms                                                                                                 | Results | Useful Hits                                            |     |     |
+| :--------- | :------------------- | :----------------------------------------------------------------------------------------------------------- | :------ | :----------------------------------------------------- | --- | --- |
+| 30-11-2025 | IEEE Xplore          | "integrated circuit modelling" AND "signal Integrity applications" AND "Neural Networks"                     | 27      | 1 (Akinwande et al.)                                   |     |     |
+| 03-12-2025 | IEEE Xplore          | "high-density interconnects" AND "machine learning"                                                          | 43      | 1 (Sreekumar & Gupta)                                  |     |     |
+| 07-01-2026 | Google Scholar       | "physics-informed" AND "interconnects"                                                                       | 1600    | 3 (Garbuglia et al.) (J. Fan et al) (T. -L. Wu et al.) |     |     |
+| 12-01-2026 | Research Gate        | "PCB manufacturing" AND "Impedance" AND "Variation"                                                          | 540     | 1 (Abdelghani Renbi et al.)                            |     |     |
+| 14-01-2026 | IEEE Xplore          | "signal and power integrity" AND "channel modeling"                                                          | 2       | 1 (Juhitha Konduru et al.)                             |     |     |
+| 21-01-2026 | IEEE Xplore          | "SI/PI Database" AND "Machine Learning"                                                                      | 7       | 1 (Morten Schierholz et al.)                           |     |     |
+| 05-02-2026 | IEEE Xplore          | "inverse design" AND "Neural Network" AND "channel"                                                          | 24      | 1 (Hanzhi Ma et al.)                                   |     |     |
+| 07-02-2026 | arxiv                | "inverse problems" AND "Deep Learning"                                                                       | 8       | 1 (Jaweria Amjad et al.)                               |     |     |
+| 11-02-2026 | arxiv                | Deep Learning AND "regularization techniques" AND "generalization gap" OR "classification margin"            | 41      | 2 (Judy Hoffman et al.), (Maya Janvier et al.)         |     |     |
+| 14-02-2026 | arxiv                | "Conditional Variational Autoencoder" AND "Tandem Network" AND "Inverse Design" AND "physical realizability" | 1       | 1(Yuxiao Li et al.)                                    |     |     |
+| 16-02-2026 | NeurIPS Proceedings  | "Generative Models" AND " Conditional Models"                                                                | 1       | 1(Sohn et al.)                                         |     |     |
+| 03-03-2026 | IEEE Xplore          | "Pole-Residue" AND "Neural Networks" OR "EM sensitivity"                                                     | 25      | 1 (Feng et al.)                                        |     |     |
+| 03-03-2026 | IEEE Xplore          | "Vector Fitting" OR "Rational Approximation"                                                                 | 16      | 1 (Gustavsen et al.)                                   |     |     |
+| 03-03-2026 | Wiley Online Library | "openEMS"                                                                                                    | 1       | 1 (Leibig et al.)                                      |     |     |
+| 16-03-2026 | IEEE Xplore          | "Mixed-Mode S-Parameters" AND "Differential S-Parameters"                                                    | 5       | 1 (Bockelman et al.)                                   |     |     |
+| 09-03-2026 | ibis.org             | "Touchstone File Format Specification"                                                                       | 1       | Touchstone® File Format Specification,version 2.0      |     |     |
 
 ## 2. Log of Articles Reviewed
-
 
 ### 1. Reference paper for building the proposal
 **Citation:**
@@ -171,8 +173,85 @@ This framework is not explored much in signal integrity applications. It is appl
 **Relevance**
 This papers shows the architectural framework for the generative inverse design used in our project. We take this foundation model and build it to solve one-to-many problem.
 
+### 13. Foundation of Conditional Variational Autoencoders
 
+**Citation**
+Kihyuk Sohn, Xinchen Yan, Honglak Lee, "Learning Structured Output Representation using Deep Conditional Generative Models", 2015, NIPS'15: Proceedings of the 29th International Conference on Neural Information Processing Systems - Volume 2,Pages 3483 - 3491
 
+**Key Finding**
 
+This paper addresses the limitation of using standard convolution networks and propose a conditional generative model (cVAE) 
 
+**Strength**
+In this literature the authors find the discrepancy in the training and testing pipeline of cVAE and address it by  introducing Gaussian Stochastic Neural Networks (GSNN)
 
+**Relevancy**
+This paper is the initial inspiration of using cVAE framework in my project to build the generative model.
+
+### 14. Rational Layer Inspiration
+**Citation**
+F. Feng, V. -M. -R. Gongal-Reddy, C. Zhang, J. Ma and Q. -J. Zhang, "Parametric Modeling of Microwave Components Using Adjoint Neural Networks and Pole-Residue Transfer Functions With EM Sensitivity Analysis," in IEEE Transactions on Microwave Theory and Techniques, vol. 65, no. 6, pp. 1955-1975, June 2017, doi: 10.1109/TMTT.2017.2650904.
+
+**Key Findings**
+This paper used the vector fitting method of finding poles and residues for sensitivity analysis based neuro transfer function that utilizes the EM sensitivity information to increase the model accuracy and also to reduce the amount of data required for training. This model uses pole-residue format - Instead of treating the s-parameters as arbitrary function, it defines a function as a function of frequency using poles and residues.
+
+**Strength**
+The model employs a two-stage training process. There is a preliminary training on the extracted poles and residue data followed by model refinement against the final EM response. This helps with data efficiency and accuracy.
+
+**Weakness**
+The order (no. of poles) can change as the geometry shifts. This causes mathematical discontinuity  this is one of the challenge in SI modeling. 
+
+**Relevance**
+I use poles-residues method in my forward model as well but this paper is only an inspiration where I'm trying build a forward proxy model to incorporate physics in construction. 
+
+### 15. Foundational Math of Poles-Residues methodology
+
+**Citation**
+B. Gustavsen and A. Semlyen, "Rational approximation of frequency domain responses by vector fitting," in IEEE Transactions on Power Delivery, vol. 14, no. 3, pp. 1052-1061, July 1999, doi: 10.1109/61.772353.
+
+**Key Finding**
+This paper serves as the foundation of using vector fitting methodology. This paper is useful to know the mathematical framework for accurately fitting rational functions to the frequency data. 
+
+**Strength**
+The authors provide strict mathematical guidelines to avoid poor conditioning of the linear problem in stage 1
+
+For functions with resonance peaks:  The Starting poles must be complex conjugate pairs distributed linearly over the frequency range. To avoid ill-conditioning, the real part should be set exactly to 1% of the imaginary part.
+
+**Weakness**
+This is an iterative process and computationally heavy to find the poles and residues using the iterative method.
+
+**Relevancy**
+I will be using poles-residues method (Vector Fitting) but will not be using the iterative workflow, instead, I'm modifying the process by using the poles and residues as trainable weights. 
+
+### 16. openEMS
+
+**Citation**
+Liebig, T., Rennings, A., Held, S. and Erni, D. (2013), openEMS – a free and open source equivalent-circuit (EC) FDTD simulation platform supporting cylindrical coordinates suitable for the analysis of traveling wave MRI applications. Int. J. Numer. Model., 26: 680-696. https://doi.org/10.1002/jnm.1875
+
+**Key Finding**
+This paper is the foundation of openEMS - an opensource EM solver.
+
+**Relevance**
+I will be using openEMS in the active learning loop in my project and I will also use it for validation of the generated results by running simulation - since this is opensource and has python API it will be useful to integrate.
+
+### 17. Mixed-Mode S-Parameters
+
+**Citation**
+D. E. Bockelman and W. R. Eisenstadt, "Combined differential and common-mode scattering parameters: theory and simulation," in _IEEE Transactions on Microwave Theory and Techniques_, vol. 43, no. 7, pp. 1530-1539, July 1995, doi: 10.1109/22.392911.
+
+**Key Finding**
+This paper was referred to implement the single end to mixed mode parameter conversion of the extracted core matrix. 
+
+**Relevance**
+The math form the paper was adapted for the conversion of single end to mixed mode conversion of the extracted core 4x4 matrix that was sliced from the raw dataset S-Parameters.
+
+### 18. Port Extraction Logic
+
+**Citation**
+[Touchstone_® _File Format Specification_, Version 2.0, Copyright© 2009 by TechAmerica.]([Microsoft Word - touchstone_ver2_0.doc](https://ibis.org/touchstone_ver2.0/touchstone_ver2_0.pdf)), Ratified by the IBIS Open Forum April 24, 2009.
+
+**Key Finding**
+The document used in commercial EM solvers like Ansys to format the ports while design and the touchstone fine after simulation. 
+
+**Relevance**
+This document is the official file format specification for the touchstone file (.SnP) used for documenting the S-Parameters. This was referred to find the port logic used for extraction of core 4x4 matrix from the raw touchstone files in the dataset - to identify the core ports with least attenuation.
