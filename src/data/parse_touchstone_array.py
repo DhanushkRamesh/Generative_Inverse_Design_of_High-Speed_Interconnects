@@ -56,7 +56,7 @@ def parse_touchstone_array(base_dir, output_dir):
     passivity_violations = 0
     print(f"extracting s-parameters for {len(sim_ids)} simulations...")
     #STANDARDIZED INTERPOLATION (0 to 100 GHz, 401 points)
-    std_rf_freq = rf.Frequency(0, 100, 401, 'ghz') # For scikit-rf interpolation
+    std_rf_freq = rf.Frequency(0.25, 100, 401, 'ghz') # For scikit-rf interpolation
     master_freqs = None # To ensure all samples have the same frequency axis after interpolation
 
     # NOTE: sim_ids and X_raw_all are rigidly parallel from the CSV. 
@@ -76,7 +76,7 @@ def parse_touchstone_array(base_dir, output_dir):
             #load the network from the touchstone file
             network = rf.Network(touchstone_file)
             #STANDARDIZED INTERPOLATION (0 to 100 GHz, 401 points)
-            network.interpolate(
+            network = network.interpolate(
                 std_rf_freq,
                 bounds_error=False, 
                 fill_value="extrapolate"

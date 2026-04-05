@@ -15,19 +15,22 @@ from src.models.rational_net import RationalNet
 # ---------------------------------------------------------------------------
 # Configuration Constants
 # ---------------------------------------------------------------------------
-NUM_POLES = 40
+NUM_POLES = 80          # Increased from 40 → 80 to capture dense resonance structure.
+                        # The TUHH datasets show many sharp dips across 0–100 GHz;
+                        # each resonance needs at least one conjugate pole pair.
 BATCH_SIZE = 32
 EPOCHS = 400
-PATIENCE = 20
+PATIENCE = 50
+HIDDEN_DIM = 512        # Width of the deeper residual backbone (v2)
 
 # Optimizer Hyperparameters
 LR_BASE = 1e-3
-LR_POLES = 1e-4  
+LR_POLES = 1e-3         # Poles move faster to find the right resonant frequencies early on, then slow down for fine-tuning
 WEIGHT_DECAY = 1e-3
 
 # Loss Function Hyperparameters
-LOSS_ALPHA = 1.0   # Weight on the complex MSE loss
-LOSS_BETA  = 0.5  # Weight on the dB magnitude loss
+LOSS_ALPHA = 1.0        # Weight on the complex MSE loss
+LOSS_BETA  = 0.5        # Weight on the dB magnitude loss
 
 # ---------------------------------------------------------------------------
 # Loss Functions
@@ -56,58 +59,71 @@ def db_magnitude_loss(S_pred, Y_true):
     return torch.mean((db_pred - db_true)**2)
 
 def passivity_penalty(residues):    
-    """Soft penalty for non-passive residues (stops massive energy blowouts)."""    
+    """
+    Soft penalty for non-passive residues (stops massive energy blowouts).
+    
+    This is the PRIMARY passivity enforcement mechanism during training.
+    Unlike v1 where this competed with a hard SVD clamp that crushed gradients,
+    this soft penalty now has full responsibility for guiding the model towards
+    passive solutions. The weight has been reduced from 500.0 to 10.0 to prevent
+    it from dominating the MSE and dB losses early in training.
+    """    
     R_real = residues.real  
     # Enforce symmetry so eigvalsh doesn't crash during autograd
     R_sym = (R_real + R_real.transpose(-1, -2)) / 2.0
-    #add a small jitter to the diagonal for numerical stability, preventing zero eigenvalues that can cause NaNs in gradients
+    # Add a small jitter to the diagonal for numerical stability, preventing
+    # zero eigenvalues that can cause NaNs in gradients
     eye = torch.eye(4, device=R_real.device).view(1, 1, 4, 4) * 1e-6
     R_reg = R_sym + eye
     eigvals = torch.linalg.eigvalsh(R_reg.view(-1, 4, 4))     
     negative_eigvals = torch.clamp(eigvals, max=0.0)    
-    return torch.mean(negative_eigvals ** 2)
+    return torch.mean(torch.abs(negative_eigvals))
 
-def combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_BETA):
+def combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_BETA, epoch=0):
     """
-    Combines Complex MSE with dB Magnitude loss.
+    Combines Complex MSE with dB Magnitude loss and soft physics penalties.
+    
+    Key change from v1: passivity penalty weight reduced from 500.0 to 10.0.
+    The hard SVD clamp no longer interferes during training, so the soft penalty
+    doesn't need to be as aggressive. A weight of 10.0 allows the model to first
+    learn the correct resonance structure, then gradually become passive as
+    the penalty pulls residue eigenvalues towards positive semi-definiteness.
     """
     mse = complex_mse_loss(S_pred, Y_true)
-    #dB magnitude loss with an added frequency weighting
+
+    # Frequency weighting: more weight on higher frequencies where deep resonances occur
+    num_freqs = S_pred.shape[1]
+    freq_weights = torch.logspace(0.0, 1.0, steps=num_freqs).to(S_pred.device).view(1, -1, 1, 1)  # weights from 1.0 to 10.0 across the frequency spectrum
+
+    # dB magnitude loss with an added frequency weighting
     epsilon = 1e-4
     db_pred = 20 * torch.log10(torch.abs(S_pred) + epsilon)
     db_true = 20 * torch.log10(torch.abs(Y_true) + epsilon)
-    #The -40dB Noise Floor Clamp
-    db_true = torch.clamp(db_true, min=-70.0)
-    db_pred = torch.clamp(db_pred, min=-70.0)
-    #db_mse = (db_pred - db_true)**2 #element-wise MSE in dB
-    #L1 Loss (MAE) gives the network a strong gradient
-    db_mae = torch.abs(db_pred - db_true)
-    #We multiply the error of the diagonal elements (S11, S22) by 5.0
-    #To force the optimizer to care about reflections as much as transmission.
-    #db_mae[:, :, 0, 0] *= 15.0  # S11
-    #db_mae[:, :, 1, 1] *= 15.0  # S22
-    #Frequency weighting: more weight on higher frequencies where deep resonances occur
-    num_freqs = S_pred.shape[1]
-    freq_weights = torch.linspace(1.0, 10.0, num_freqs).to(S_pred.device) # Linearly increasing weight from 1 to 10 across the frequency spectrum
-    #shape frequency weights for broadcasting
-    weighted_db_loss = db_mae * freq_weights.view(1, -1, 1, 1)
-    #port mulltipliers
-    port_mae = torch.mean(weighted_db_loss, dim=(0, 1)) #shape (4, 4)
-    multiplier = torch.ones(4, 4).to(S_pred.device)
-    multiplier[0, 0] = 15.0  # S11
-    multiplier[1, 1] = 15.0  # S22
-    multiplier[2, 2] = 15.0  # S33
-    multiplier[3, 3] = 15.0  # S44
-    #final dB loss after port weighting
-    final_db_loss = torch.mean(port_mae * multiplier)
-    #soft penalty for passivity violations
+    # The -70 dB Noise Floor Clamp
+    db_mae = torch.abs(db_pred - torch.clamp(db_true, min=-70.0))
+    final_db_loss = torch.mean(db_mae * freq_weights)
+
+    # Sobolev Slope Loss - derivative loss to encourage correct slope at resonances, improving Q-factor fitting
+    diff_pred = S_pred[:, 1:, :, :] - S_pred[:, :-1, :, :]
+    diff_true = Y_true[:, 1:, :, :] - Y_true[:, :-1, :, :]
+    slope_loss = torch.mean(torch.abs(diff_pred - diff_true))
+
+    # Soft penalty for passivity violations
     p_loss = passivity_penalty(residues)
-    #Damping penalty for poles to stay away from the imaginary axis, encouraging causality and numerical stability.
-    #damping_penalty = torch.mean(1.0 / (torch.abs(poles.real) + 1e-5))
-    #residue penalty to encourage passivity by penalizing large positive real parts in residues
-    #residue_l2 = torch.mean(torch.abs(residues)**2)
-    #returened combined loss with appropriate weighting
-    return (alpha * mse) + (beta * final_db_loss) + (1.0 * p_loss)
+
+    # Loss balancing
+    # Slope loss delayed to epoch 10 to let the model learn the basic shape first
+    slope_weight = 0.1 if epoch > 10 else 0.0
+
+    # Passivity penalty weight schedule:
+    # Start very low (1.0) to let the model learn resonance structure freely,
+    # then ramp up to 10.0 after epoch 50 to enforce physical constraints.
+    # This curriculum prevents the passivity term from dominating early training
+    # and collapsing the S-matrix to trivial near-identity solutions.
+    passivity_weight = min(10.0, 1.0 + (9.0 * epoch / 50.0))
+
+    # Final weighted loss combination
+    return (alpha * mse) + (beta * final_db_loss) + (slope_weight * slope_loss) + (passivity_weight * p_loss)
 
 # ---------------------------------------------------------------------------
 # Main Training Pipeline
@@ -121,7 +137,7 @@ def train_model(dataset_type='link'):
         torch.mps.manual_seed(42)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu')
-    print(f"--- Training RationalNet on {device.type.upper()} ({dataset_type.upper()} Dataset) ---")
+    print(f"--- Training RationalNet v2 on {device.type.upper()} ({dataset_type.upper()} Dataset) ---")
 
     # Dynamic dataset folder routing
     dataset_folder = 'Universal-Diff-SI-Array' if dataset_type == 'array' else 'Universal-Diff-SI-Link'
@@ -138,21 +154,27 @@ def train_model(dataset_type='link'):
     # Matching TUHH standard 250 MHz to 100 GHz sweep
     frequencies_hz = torch.linspace(0.25e9, 100e9, num_freqs).to(device)
 
-    # Instantiate RationalNet
+    # Instantiate RationalNet v2
     model = RationalNet(
         num_poles=NUM_POLES,
         num_local_features=num_local,
         num_global_features=num_global,
-        num_ports=4
+        num_ports=4,
+        hidden_dim=HIDDEN_DIM
     ).to(device)
 
     # Print model summary
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"\nTotal parameters:     {total_params:,}")
-    print(f"Trainable parameters: {trainable_params:,}\n")
+    print(f"Trainable parameters: {trainable_params:,}")
+    print(f"Num poles:            {NUM_POLES} ({NUM_POLES//2} conjugate pairs)")
+    print(f"Hidden dim:           {HIDDEN_DIM}")
+    print(f"Residual blocks:      3\n")
 
-    # Isolate weight decay to prevent fighting the softplus causality constraint on poles
+    # Isolate weight decay to prevent fighting the softplus causality constraint on poles.
+    # Poles and residues get zero weight decay — the softplus constraint on poles and the
+    # soft passivity penalty on residues handle regularisation through physics, not L2.
     pole_params = []
     residue_params = []
     base_params = []
@@ -186,6 +208,15 @@ def train_model(dataset_type='link'):
     for epoch in range(1, EPOCHS + 1):
         model.train()
         epoch_train_loss = 0.0
+
+        # Curriculum Learning: gradually expand the frequency range.
+        # Stretched from 50 epochs (v1) to 150 epochs (v2) to give the model
+        # more time to properly learn the low-frequency behaviour (which is smoother
+        # and easier) before introducing the high-frequency resonances.
+        # Start at 20% of spectrum, smoothly grow to 100%.
+        progress_ratio = min(1.0, epoch / 150.0)
+        current_limit = 0.2 + (0.8 * progress_ratio)
+        freq_limit = int(num_freqs * current_limit)
         
         for x_loc, x_glob, y_r, y_i in tqdm(train_loader, desc=f"Epoch {epoch:03d} [Train]", leave=False):
             x_loc, x_glob = x_loc.to(device), x_glob.to(device)
@@ -194,9 +225,9 @@ def train_model(dataset_type='link'):
             optimizer.zero_grad()
             
             poles, residues, d_term = model(x_loc, x_glob)
-            S_pred = model.predict_frequency_response(poles, residues, d_term, frequencies_hz)
-            
-            loss = combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_BETA)
+            S_pred = model.predict_frequency_response(poles, residues, d_term, frequencies_hz[:freq_limit])
+            # The combined loss function now also takes poles and residues as input for the passivity penalty
+            loss = combined_loss(S_pred, Y_true[:, :freq_limit], poles, residues, epoch=epoch)
             loss.backward()
             
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -214,9 +245,9 @@ def train_model(dataset_type='link'):
                 Y_true = torch.complex(y_r, y_i).to(device)
                 
                 poles, residues, d_term = model(x_loc, x_glob)
-                S_pred = model.predict_frequency_response(poles, residues, d_term, frequencies_hz)
+                S_pred = model.predict_frequency_response(poles, residues, d_term, frequencies_hz[:freq_limit])
                 
-                loss = combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_BETA)
+                loss = combined_loss(S_pred, Y_true[:, :freq_limit], poles, residues, epoch=epoch)
                 epoch_val_loss += loss.item() * x_loc.size(0)
                 
         epoch_val_loss /= len(val_loader.dataset)
@@ -232,7 +263,7 @@ def train_model(dataset_type='link'):
         history['lr_pole'].append(current_lr_pole)
 
         if epoch % 5 == 0 or epoch == 1:
-            print(f"Epoch [{epoch:03d}/{EPOCHS}] | Train Loss: {epoch_train_loss:.4e} | Val Loss: {epoch_val_loss:.4e} | LR_base: {current_lr_base:.2e} | LR_pole: {current_lr_pole:.2e}")
+            print(f"Epoch [{epoch:03d}/{EPOCHS}] | Train Loss: {epoch_train_loss:.4e} | Val Loss: {epoch_val_loss:.4e} | LR_base: {current_lr_base:.2e} | LR_pole: {current_lr_pole:.2e} | Freq: {current_limit*100:.0f}%")
 
         # Save Checkpoint & Early Stopping Check
         if epoch_val_loss < best_val_loss:
@@ -246,6 +277,7 @@ def train_model(dataset_type='link'):
                 'num_poles':      NUM_POLES,
                 'num_local':      num_local,
                 'num_global':     num_global,
+                'hidden_dim':     HIDDEN_DIM,
                 'dataset_type':   dataset_type,
             }, best_model_path)
         else:
@@ -272,6 +304,8 @@ def train_model(dataset_type='link'):
     print(f"Loaded best checkpoint from epoch {checkpoint['epoch']} with val loss {checkpoint['val_loss']:.4e}")
     
     test_loss = 0.0
+    total_db_mae = 0.0
+    total_phase_mae = 0.0
     all_poles = []
     all_residues = []
     
@@ -283,22 +317,37 @@ def train_model(dataset_type='link'):
             poles, residues, d_term = model(x_loc, x_glob)
             S_pred = model.predict_frequency_response(poles, residues, d_term, frequencies_hz)
             
-            loss = combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_BETA)
+            loss = combined_loss(S_pred, Y_true, poles, residues, epoch=EPOCHS)
             test_loss += loss.item() * x_loc.size(0)
+            # Metric calculations for S-parameter accuracy in dB and phase, averaged across all ports and frequencies
+            eps = 1e-4
+            db_err = torch.abs((20*torch.log10(torch.abs(S_pred)+eps)) - (20*torch.log10(torch.abs(Y_true)+eps)))
+            phase_err = torch.abs(torch.angle(S_pred) - torch.angle(Y_true)) * (180.0 / torch.pi)  # Convert rad to deg
+            # Accumulate weighted errors for the entire test set
+            total_db_mae += torch.mean(db_err).item() * x_loc.size(0)
+            total_phase_mae += torch.mean(phase_err).item() * x_loc.size(0)
             
             all_poles.append(poles)
             all_residues.append(residues)
             
     test_loss /= len(test_loader.dataset)
-    print(f"Final Test Loss (Combined MSE + dB): {test_loss:.4e}")
+    # Average the accumulated metrics across the entire test set
+    avg_db_mae = total_db_mae / len(test_loader.dataset)
+    avg_phase_mae = total_phase_mae / len(test_loader.dataset)
+    
+    # Print the final metrics
+    print(f"\nFinal Test Loss (Combined): {test_loss:.4e}")
+    print(f"Final Mean Absolute Error (dB): {avg_db_mae:.2f} dB")
+    print(f"Final Phase Error (Degrees): {avg_phase_mae:.2f}°")
     
     all_poles = torch.cat(all_poles, dim=0)
     all_residues = torch.cat(all_residues, dim=0)
     physics_checks = model.verify_physics_constraints(all_poles, all_residues)
         
-    print(f"Causality Preserved: {'PASSED' if physics_checks['causality_preserved'] else 'FAILED'}")
-    print(f"Symmetry Preserved:  {'PASSED' if physics_checks['conjugate_symmetry_preserved'] else 'FAILED'}")
-    print(f"Passivity Preserved: {'PASSED' if physics_checks['passivity_preserved'] else 'FAILED'} (Min Eigenvalue: {physics_checks['min_residue_eigenvalue']:.2e})")
+    print(f"\nPhysics Constraint Verification:")
+    print(f"  Causality Preserved: {'PASSED' if physics_checks['causality_preserved'] else 'FAILED'}")
+    print(f"  Symmetry Preserved:  {'PASSED' if physics_checks['conjugate_symmetry_preserved'] else 'FAILED'}")
+    print(f"  Passivity Preserved: {'PASSED' if physics_checks['passivity_preserved'] else 'FAILED'} (Min Eigenvalue: {physics_checks['min_residue_eigenvalue']:.2e})")
 
 if __name__ == "__main__":
     # To run on the Array dataset later, swap 'link' for 'array'
