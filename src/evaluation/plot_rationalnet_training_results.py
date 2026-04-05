@@ -59,7 +59,7 @@ def plot_s_parameters(dataset_type='link'):
     f_ghz = frequencies_hz.numpy() / 1e9 # For plotting x-axis
     
     # Load Model
-    model = RationalNet(num_poles=128, num_local_features=num_local, num_global_features=num_global, num_ports=4)
+    model = RationalNet(num_poles=40, num_local_features=num_local, num_global_features=num_global, num_ports=4)
     checkpoint_path = os.path.join(PROJ_ROOT, f"results/checkpoints/best_rational_net_{dataset_type}.pth")
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
     model.load_state_dict(checkpoint['model_state'])

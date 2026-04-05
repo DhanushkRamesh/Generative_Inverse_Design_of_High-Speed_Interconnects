@@ -15,7 +15,7 @@ from src.models.rational_net import RationalNet
 # ---------------------------------------------------------------------------
 # Configuration Constants
 # ---------------------------------------------------------------------------
-NUM_POLES = 128
+NUM_POLES = 40
 BATCH_SIZE = 32
 EPOCHS = 400
 PATIENCE = 20
@@ -23,11 +23,11 @@ PATIENCE = 20
 # Optimizer Hyperparameters
 LR_BASE = 1e-3
 LR_POLES = 1e-4  
-WEIGHT_DECAY = 1e-4
+WEIGHT_DECAY = 1e-3
 
 # Loss Function Hyperparameters
-LOSS_ALPHA = 0.1   # Weight on the complex MSE loss
-LOSS_BETA  = 5.0  # Weight on the dB magnitude loss
+LOSS_ALPHA = 1.0   # Weight on the complex MSE loss
+LOSS_BETA  = 0.5  # Weight on the dB magnitude loss
 
 # ---------------------------------------------------------------------------
 # Loss Functions
@@ -55,6 +55,18 @@ def db_magnitude_loss(S_pred, Y_true):
     
     return torch.mean((db_pred - db_true)**2)
 
+def passivity_penalty(residues):    
+    """Soft penalty for non-passive residues (stops massive energy blowouts)."""    
+    R_real = residues.real  
+    # Enforce symmetry so eigvalsh doesn't crash during autograd
+    R_sym = (R_real + R_real.transpose(-1, -2)) / 2.0
+    #add a small jitter to the diagonal for numerical stability, preventing zero eigenvalues that can cause NaNs in gradients
+    eye = torch.eye(4, device=R_real.device).view(1, 1, 4, 4) * 1e-6
+    R_reg = R_sym + eye
+    eigvals = torch.linalg.eigvalsh(R_reg.view(-1, 4, 4))     
+    negative_eigvals = torch.clamp(eigvals, max=0.0)    
+    return torch.mean(negative_eigvals ** 2)
+
 def combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_BETA):
     """
     Combines Complex MSE with dB Magnitude loss.
@@ -64,22 +76,38 @@ def combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_B
     epsilon = 1e-4
     db_pred = 20 * torch.log10(torch.abs(S_pred) + epsilon)
     db_true = 20 * torch.log10(torch.abs(Y_true) + epsilon)
-    db_mse = (db_pred - db_true)**2 #element-wise MSE in dB
+    #The -40dB Noise Floor Clamp
+    db_true = torch.clamp(db_true, min=-70.0)
+    db_pred = torch.clamp(db_pred, min=-70.0)
+    #db_mse = (db_pred - db_true)**2 #element-wise MSE in dB
+    #L1 Loss (MAE) gives the network a strong gradient
+    db_mae = torch.abs(db_pred - db_true)
     #We multiply the error of the diagonal elements (S11, S22) by 5.0
     #To force the optimizer to care about reflections as much as transmission.
-    db_mse[:, :, 0, 0] *= 15.0  # S11
-    db_mse[:, :, 1, 1] *= 15.0  # S22
+    #db_mae[:, :, 0, 0] *= 15.0  # S11
+    #db_mae[:, :, 1, 1] *= 15.0  # S22
     #Frequency weighting: more weight on higher frequencies where deep resonances occur
     num_freqs = S_pred.shape[1]
     freq_weights = torch.linspace(1.0, 10.0, num_freqs).to(S_pred.device) # Linearly increasing weight from 1 to 10 across the frequency spectrum
     #shape frequency weights for broadcasting
-    weighted_db_loss = torch.mean(db_mse * freq_weights.view(1, -1, 1, 1))
+    weighted_db_loss = db_mae * freq_weights.view(1, -1, 1, 1)
+    #port mulltipliers
+    port_mae = torch.mean(weighted_db_loss, dim=(0, 1)) #shape (4, 4)
+    multiplier = torch.ones(4, 4).to(S_pred.device)
+    multiplier[0, 0] = 15.0  # S11
+    multiplier[1, 1] = 15.0  # S22
+    multiplier[2, 2] = 15.0  # S33
+    multiplier[3, 3] = 15.0  # S44
+    #final dB loss after port weighting
+    final_db_loss = torch.mean(port_mae * multiplier)
+    #soft penalty for passivity violations
+    p_loss = passivity_penalty(residues)
     #Damping penalty for poles to stay away from the imaginary axis, encouraging causality and numerical stability.
-    damping_penalty = torch.mean(1.0 / (torch.abs(poles.real) + 1e-5))
+    #damping_penalty = torch.mean(1.0 / (torch.abs(poles.real) + 1e-5))
     #residue penalty to encourage passivity by penalizing large positive real parts in residues
-    residue_l2 = torch.mean(torch.abs(residues)**2)
+    #residue_l2 = torch.mean(torch.abs(residues)**2)
     #returened combined loss with appropriate weighting
-    return (alpha * mse) + (beta * weighted_db_loss) + (1e-4 * damping_penalty) + (0.0 * residue_l2)
+    return (alpha * mse) + (beta * final_db_loss) + (1.0 * p_loss)
 
 # ---------------------------------------------------------------------------
 # Main Training Pipeline
@@ -126,16 +154,20 @@ def train_model(dataset_type='link'):
 
     # Isolate weight decay to prevent fighting the softplus causality constraint on poles
     pole_params = []
+    residue_params = []
     base_params = []
     for name, param in model.named_parameters():
         if 'poles' in name:
             pole_params.append(param)
+        elif 'residues' in name or 'd_term' in name:
+            residue_params.append(param)
         else:
             base_params.append(param)
 
     optimizer = optim.AdamW([
         {'params': base_params, 'lr': LR_BASE, 'weight_decay': WEIGHT_DECAY},
-        {'params': pole_params, 'lr': LR_POLES, 'weight_decay': 0.0}
+        {'params': pole_params, 'lr': LR_POLES, 'weight_decay': 0.0},
+        {'params': residue_params, 'lr': LR_BASE, 'weight_decay': 0.0}
     ], lr=LR_BASE)
 
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=10)

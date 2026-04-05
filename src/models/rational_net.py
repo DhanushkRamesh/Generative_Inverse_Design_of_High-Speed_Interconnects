@@ -37,10 +37,10 @@ class RationalNet(nn.Module):
         self.input_layer = nn.Linear(total_features, 512)
         self.residual_block = nn.Sequential(
             nn.SiLU(),
-            nn.Dropout(0.05),
+            nn.Dropout(0.15),
             nn.Linear(512, 512),
             nn.SiLU(),
-            nn.Dropout(0.05),
+            nn.Dropout(0.15),
             nn.Linear(512, 512)
         )
 
@@ -69,14 +69,16 @@ class RationalNet(nn.Module):
         #manually initialise the resisues bias 
         #spread the initial pole across the frequency spectrum to encourage stable training from the start
         with torch.no_grad():
-            initial_imag = torch.linspace(0, 100 * 2 * torch.pi, self.num_poles_half) # multiply by 2*pi to convert from GHz to rad/s for better numerical stability in the rational function evaluation.
+            initial_imag = torch.linspace(0.25 * 2 * torch.pi, 100 * 2 * torch.pi, self.num_poles_half) # multiply by 2*pi to convert from GHz to rad/s for better numerical stability in the rational function evaluation.
             self.poles_imag.bias.copy_(initial_imag)
+            #Start the poles sharp
+            nn.init.constant_(self.poles_real.bias, -3.0)
             #real residues bias initialised to small positive values to encourage passivity early in training, while still allowing gradient flow
             nn.init.normal_(self.residues_real.weight, std=0.01)
-            nn.init.constant_(self.residues_real.bias, 0.5) # Start with zero imaginary residues to bias towards physical realism early in training
+            nn.init.constant_(self.residues_real.bias, 0.0) # Start with zero imaginary residues to bias towards physical realism early in training
             #imaginary residues bias initialised to small values to allow non-zero phase responses while still encouraging physical realism early in training. This is a hyperparameter that can be tuned for faster convergence or better final performance. Setting it too high may lead to unstable training early on, while setting it too low may bias the model towards zero-phase solutions which are not physically accurate for many interconnect structures. A value of 0.5 was found to provide a good balance in preliminary experiments, but this can be adjusted based on the specific dataset and training dynamics observed.
             nn.init.normal_(self.residues_imag.weight, std=0.01) 
-            nn.init.constant_(self.residues_imag.bias, 0.1) # Start with zero imaginary residues to bias towards physical realism early in training
+            nn.init.constant_(self.residues_imag.bias, 0.0) # Start with zero imaginary residues to bias towards physical realism early in training
             nn.init.constant_(self.d_term_real.bias, 0.0)
 
 
@@ -211,16 +213,21 @@ class RationalNet(nn.Module):
         # We can check that the real part of residues is positive semi-definite by confirming all
         #minimal eigenvalues are non-negative. This is a necessary condition for passivity, though not sufficient on its own.
         #Cholesky parameterisation guarantees positive semi-definiteness, but numerical issues could arise during training, so this is a useful diagnostic.
+        #passivity check
         R_real = residues.real # shape: [batch_size, num_poles, num_ports, num_ports]
+        
+        #  Enforce mathematical symmetry 
+        R_sym = (R_real + R_real.transpose(-1, -2)) / 2.0
+        
         min_eigval = float('inf')
         is_passive = True
-        for b in range(R_real.shape[0]):
-            for pole_idx in range(R_real.shape[1]):
-                eigvals = torch.linalg.eigvalsh(R_real[b, pole_idx])
+        for b in range(R_sym.shape[0]):
+            for pole_idx in range(R_sym.shape[1]):
+                # ---> CHANGE R_real to R_sym here <---
+                eigvals = torch.linalg.eigvalsh(R_sym[b, pole_idx])
                 min_eigval = min(min_eigval, eigvals.min().item())
                 if eigvals.min().item() < -1e-6:
                     is_passive = False
-
         return {
             "causality_preserved": is_causal,
             "conjugate_symmetry_preserved": is_symmetric,
