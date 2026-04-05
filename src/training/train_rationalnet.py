@@ -17,7 +17,7 @@ from src.models.rational_net import RationalNet
 # ---------------------------------------------------------------------------
 NUM_POLES = 128
 BATCH_SIZE = 32
-EPOCHS = 200
+EPOCHS = 400
 PATIENCE = 20
 
 # Optimizer Hyperparameters
@@ -79,7 +79,7 @@ def combined_loss(S_pred, Y_true, poles, residues, alpha=LOSS_ALPHA, beta=LOSS_B
     #residue penalty to encourage passivity by penalizing large positive real parts in residues
     residue_l2 = torch.mean(torch.abs(residues)**2)
     #returened combined loss with appropriate weighting
-    return (alpha * mse) + (beta * weighted_db_loss) + (0.05 * damping_penalty) + (1e-3 * residue_l2)
+    return (alpha * mse) + (beta * weighted_db_loss) + (1e-4 * damping_penalty) + (0.0 * residue_l2)
 
 # ---------------------------------------------------------------------------
 # Main Training Pipeline

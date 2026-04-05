@@ -10,7 +10,6 @@ class RationalNet(nn.Module):
     Based on the Vector Fitting framework (Gustavsen and Semlyen, 1999), extended with:
       - Shared poles across the full 4x4 S-matrix (poles are structural properties, not port-specific)
       - Causality enforced by constraining pole real parts negative via softplus (left half-plane guarantee)
-      - Passivity enforced via Cholesky parameterisation R = L @ L^T (positive semi-definite residues)
       - Conjugate pole symmetry enforced to guarantee real-valued time-domain impulse response
       - Numerical stabilisation in rational assembly to prevent division by near-zero denominators
     
@@ -59,13 +58,9 @@ class RationalNet(nn.Module):
         self.poles_real = nn.Linear(512, self.num_poles_half)
         self.poles_imag = nn.Linear(512, self.num_poles_half)
 
-        # 2. Residues heads: separate Cholesky factor heads for real and imaginary parts.
-        # R = L @ L^T guarantees positive semi-definite residues — hard passivity constraint.
-        # Two separate L heads are needed because physical residues are complex-valued.
-        # Using a single real L and casting to complex would force zero imaginary parts,
-        # restricting the model to zero-phase responses only, which is physically incorrect.
-        self.residues_L_real = nn.Linear(512, self.num_poles_half * num_ports * num_ports)
-        self.residues_L_imag = nn.Linear(512, self.num_poles_half * num_ports * num_ports)
+        # 2. Residues heads:
+        self.residues_real = nn.Linear(512, self.num_poles_half * num_ports * num_ports)
+        self.residues_imag = nn.Linear(512, self.num_poles_half * num_ports * num_ports)
 
         # 3. Direct term head (D): real-valued constant feedthrough matrix.
         # D is strictly real for passive networks (Gustavsen and Semlyen, 1999).
@@ -77,11 +72,11 @@ class RationalNet(nn.Module):
             initial_imag = torch.linspace(0, 100 * 2 * torch.pi, self.num_poles_half) # multiply by 2*pi to convert from GHz to rad/s for better numerical stability in the rational function evaluation.
             self.poles_imag.bias.copy_(initial_imag)
             #real residues bias initialised to small positive values to encourage passivity early in training, while still allowing gradient flow
-            nn.init.normal_(self.residues_L_real.weight, std=0.01)
-            nn.init.constant_(self.residues_L_real.bias, 0.5) # Start with zero imaginary residues to bias towards physical realism early in training
+            nn.init.normal_(self.residues_real.weight, std=0.01)
+            nn.init.constant_(self.residues_real.bias, 0.5) # Start with zero imaginary residues to bias towards physical realism early in training
             #imaginary residues bias initialised to small values to allow non-zero phase responses while still encouraging physical realism early in training. This is a hyperparameter that can be tuned for faster convergence or better final performance. Setting it too high may lead to unstable training early on, while setting it too low may bias the model towards zero-phase solutions which are not physically accurate for many interconnect structures. A value of 0.5 was found to provide a good balance in preliminary experiments, but this can be adjusted based on the specific dataset and training dynamics observed.
-            nn.init.normal_(self.residues_L_imag.weight, std=0.01) 
-            nn.init.constant_(self.residues_L_imag.bias, 0.1) # Start with zero imaginary residues to bias towards physical realism early in training
+            nn.init.normal_(self.residues_imag.weight, std=0.01) 
+            nn.init.constant_(self.residues_imag.bias, 0.1) # Start with zero imaginary residues to bias towards physical realism early in training
             nn.init.constant_(self.d_term_real.bias, 0.0)
 
 
@@ -118,29 +113,8 @@ class RationalNet(nn.Module):
         poles = torch.complex(poles_real, poles_imag)       # [batch_size, num_poles]
 
         # ---- Residues ----
-        # Cholesky factorisation R = L @ L^T guarantees positive semi-definite residues.
-        # Separate L matrices for real and imaginary parts since residues are complex-valued.
-
-        # Real part of residues
-        L_flat_real = self.residues_L_real(hidden)
-        L_real = torch.tril(
-            L_flat_real.view(batch_size, self.num_poles_half, self.num_ports, self.num_ports)
-        )
-        R_real_half = torch.bmm(
-            L_real.view(-1, self.num_ports, self.num_ports),
-            L_real.view(-1, self.num_ports, self.num_ports).transpose(1, 2)
-        ).view(batch_size, self.num_poles_half, self.num_ports, self.num_ports)
-
-        # Imaginary part of residues
-        L_flat_imag = self.residues_L_imag(hidden)
-        L_imag = torch.tril(
-            L_flat_imag.view(batch_size, self.num_poles_half, self.num_ports, self.num_ports)
-        )
-        R_imag_half = torch.bmm(
-            L_imag.view(-1, self.num_ports, self.num_ports),
-            L_imag.view(-1, self.num_ports, self.num_ports).transpose(1, 2)
-        ).view(batch_size, self.num_poles_half, self.num_ports, self.num_ports)
-
+        R_real_half = self.residues_real(hidden).view(batch_size, self.num_poles_half, self.num_ports, self.num_ports)
+        R_imag_half = self.residues_imag(hidden).view(batch_size, self.num_poles_half, self.num_ports, self.num_ports)
         #Mirror for conjugate symmetry
         R_real = torch.cat([R_real_half, R_real_half], dim=1)
         R_imag = torch.cat([R_imag_half, -R_imag_half], dim=1)
