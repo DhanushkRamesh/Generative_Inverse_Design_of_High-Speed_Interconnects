@@ -1,0 +1,16 @@
+{
+  "dataset": "link",
+  "best_epoch": 389,
+  "best_val_loss": 2.365911209694693,
+  "overall_db_mae": 5.1047472070764615,
+  "differential_mae": 4.267132198369062,
+  "cross_mode_mae": 5.868197995203513,
+  "common_mode_mae": 4.4154611715564025,
+  "per_element_differential": {
+    "Sdd11 (Return Loss)": 3.8465436123035572,
+    "Sdd12 (FEXT)": 4.688866076646028,
+    "Sdd21 (Insertion Loss)": 4.691494491365221,
+    "Sdd22 (Return Loss)": 3.84162461316144
+  },
+  "total_params": 7380000
+}

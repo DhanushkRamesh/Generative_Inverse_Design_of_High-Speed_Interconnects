@@ -4,6 +4,7 @@ import torch
 import numpy as np
 import skrf as rf
 from tqdm import tqdm
+import time
 
 """
 Stage 1: Classical Vector Fitting Pre-Fitting
@@ -24,8 +25,8 @@ Why this is needed:
     smoother and easier optimization problem.
 
 Usage:
-  python prefit_vectorfitting.py --dataset_type array
-  python prefit_vectorfitting.py --dataset_type link
+  python prefit_vectorfitting.py
+  (Runs both array and link datasets automatically)
 """
 
 # Add project root to path
@@ -37,7 +38,75 @@ sys.path.append(PROJ_ROOT)
 # ---------------------------------------------------------------------------
 NUM_POLES_COMPLEX = 40  # Number of complex conjugate pairs for VF fitting.
                          # Must match num_poles_half in RationalNet (num_poles=80 → 40 pairs).
-                         # VF can handle this robustly whereas the NN struggled.
+
+def extract_residues_3d(vf, num_ports=4):
+    """
+    Extracts residues from scikit-rf VectorFitting into a consistent 3D array.
+    
+    scikit-rf stores residues differently depending on the version:
+      - Some versions: numpy object array of shape (n_ports, n_ports) where
+        each element is a 1D array of length n_poles
+      - Some versions: 2D array of shape (n_responses, n_poles)
+      - Some versions: 3D array of shape (n_ports, n_ports, n_poles)
+    
+    This function normalises all formats to shape [n_ports, n_ports, n_poles].
+    """
+    residues_raw = vf.residues
+    
+    # Case 1: Already 3D — (n_ports, n_ports, n_poles)
+    if hasattr(residues_raw, 'ndim') and residues_raw.ndim == 3:
+        return residues_raw
+    
+    # Case 2: Object array of shape (n_ports, n_ports) with 1D arrays inside
+    if hasattr(residues_raw, 'dtype') and residues_raw.dtype == object:
+        n_poles = len(residues_raw.flat[0])
+        result = np.zeros((num_ports, num_ports, n_poles), dtype=complex)
+        for i in range(num_ports):
+            for j in range(num_ports):
+                result[i, j, :] = residues_raw[i, j]
+        return result
+    
+    # Case 3: 2D array of shape (n_responses, n_poles) where n_responses = n_ports^2
+    if hasattr(residues_raw, 'ndim') and residues_raw.ndim == 2:
+        n_responses, n_poles = residues_raw.shape
+        if n_responses == num_ports * num_ports:
+            return residues_raw.reshape(num_ports, num_ports, n_poles)
+        else:
+            # Might be (n_poles, n_responses) transposed
+            return residues_raw.T.reshape(num_ports, num_ports, -1)
+    
+    # Case 4: List of lists or other iterable
+    n_poles = len(vf.poles)
+    result = np.zeros((num_ports, num_ports, n_poles), dtype=complex)
+    for i in range(num_ports):
+        for j in range(num_ports):
+            result[i, j, :] = np.array(residues_raw[i][j])
+    return result
+
+def extract_d_term(vf, num_ports=4):
+    """
+    Extracts the direct/proportional term from VectorFitting.
+    
+    scikit-rf may store this as:
+      - vf.proportional_coeff (2D array)
+      - vf.d (2D array)
+      - vf.constant_coeff
+    
+    Returns shape [n_ports, n_ports].
+    """
+    # Try different attribute names across scikit-rf versions
+    for attr in ['proportional_coeff', 'd', 'constant_coeff']:
+        if hasattr(vf, attr):
+            d_raw = getattr(vf, attr)
+            if d_raw is not None:
+                d_arr = np.array(d_raw)
+                if d_arr.ndim == 2 and d_arr.shape == (num_ports, num_ports):
+                    return d_arr.real
+                elif d_arr.ndim == 1 and d_arr.shape[0] == num_ports * num_ports:
+                    return d_arr.real.reshape(num_ports, num_ports)
+    
+    # If no D term found, return zeros (common for many passive structures)
+    return np.zeros((num_ports, num_ports), dtype=np.float32)
 
 def run_vectorfitting_on_dataset(dataset_type='array'):
     """
@@ -73,7 +142,42 @@ def run_vectorfitting_on_dataset(dataset_type='array'):
     all_d_term = []           # [num_samples, 4, 4]
     
     failed_indices = []
+    start_time = time.time()
     
+    # Run VF on the first sample with debug output to verify format
+    print(f"\n[DEBUG] Running first sample to verify scikit-rf VF output format...")
+    s_complex_0 = Y_real[0].numpy() + 1j * Y_imag[0].numpy()
+    ntwk_0 = rf.Network(frequency=freq_obj, s=s_complex_0)
+    vf_0 = rf.VectorFitting(ntwk_0)
+    vf_0.vector_fit(n_poles_real=0, n_poles_cmplx=NUM_POLES_COMPLEX)
+    
+    print(f"  vf.poles:    type={type(vf_0.poles)}, shape={np.array(vf_0.poles).shape}")
+    print(f"  vf.residues: type={type(vf_0.residues)}, ", end="")
+    if hasattr(vf_0.residues, 'shape'):
+        print(f"shape={vf_0.residues.shape}, dtype={vf_0.residues.dtype}")
+    else:
+        print(f"len={len(vf_0.residues)}")
+    
+    # Check which D term attribute exists
+    for attr in ['proportional_coeff', 'd', 'constant_coeff']:
+        if hasattr(vf_0, attr):
+            val = getattr(vf_0, attr)
+            if val is not None:
+                print(f"  vf.{attr}: type={type(val)}, shape={np.array(val).shape}")
+    
+    # Verify extraction works on first sample
+    try:
+        residues_test = extract_residues_3d(vf_0, num_ports=4)
+        d_test = extract_d_term(vf_0, num_ports=4)
+        print(f"  Extracted residues shape: {residues_test.shape}")
+        print(f"  Extracted D term shape:   {d_test.shape}")
+        print(f"[DEBUG] Format verified successfully!\n")
+    except Exception as e:
+        print(f"[ERROR] Residue extraction failed: {e}")
+        print(f"        Please check scikit-rf version and VectorFitting API.")
+        return
+    
+    # Main loop over all samples
     for idx in tqdm(range(num_samples), desc="Vector Fitting"):
         # Reconstruct the complex S-parameter matrix for this sample
         s_complex = Y_real[idx].numpy() + 1j * Y_imag[idx].numpy()
@@ -88,66 +192,66 @@ def run_vectorfitting_on_dataset(dataset_type='array'):
             vf.vector_fit(n_poles_real=0, n_poles_cmplx=NUM_POLES_COMPLEX)
             
             # Extract fitted poles
-            # VF poles come as a 1D array of complex values.
-            # For conjugate pairs, VF returns both p and p* — we only keep the
-            # upper half (positive imaginary) and let the model mirror them.
-            poles = vf.poles  # shape: [2 * NUM_POLES_COMPLEX]
+            poles = np.array(vf.poles)  # shape: [2 * NUM_POLES_COMPLEX]
             
             # Select only poles with positive imaginary part (upper half-plane)
+            # For conjugate pairs, VF returns both p and p* 
             upper_mask = poles.imag >= 0
             poles_upper = poles[upper_mask]
             
-            # If VF returned real poles or unexpected count, handle gracefully
-            if len(poles_upper) != NUM_POLES_COMPLEX:
-                # Sort all poles by imaginary part and take the top half
-                sorted_idx = np.argsort(poles.imag)
-                poles_upper = poles[sorted_idx[NUM_POLES_COMPLEX:]]
+            # Handle edge cases: if VF returned unexpected pole count
+            if len(poles_upper) < NUM_POLES_COMPLEX:
+                # Some poles may be purely real — include them and pad if needed
+                all_poles_sorted = poles[np.argsort(-poles.imag)]  # descending by imag
+                poles_upper = all_poles_sorted[:NUM_POLES_COMPLEX]
+            elif len(poles_upper) > NUM_POLES_COMPLEX:
+                # Take the NUM_POLES_COMPLEX with largest imaginary parts
+                sort_by_imag = np.argsort(poles_upper.imag)
+                poles_upper = poles_upper[sort_by_imag[-NUM_POLES_COMPLEX:]]
             
             # Sort by imaginary part (ascending frequency) for consistent ordering
-            # across samples. This ensures pole k always corresponds to roughly
-            # the same frequency region, making the supervised loss meaningful.
             sort_idx = np.argsort(poles_upper.imag)
             poles_upper = poles_upper[sort_idx]
             
-            # Extract residues
-            # scikit-rf VectorFitting stores residues as [n_ports, n_ports, n_poles]
-            # We need [n_poles, n_ports, n_ports] to match our model convention.
-            residues_raw = vf.residues  # shape: [4, 4, 2*NUM_POLES_COMPLEX]
+            # Extract residues as 3D array [4, 4, n_poles]
+            residues_3d = extract_residues_3d(vf, num_ports=4)
             
-            # Select residues corresponding to the upper-half poles and reorder
-            # to match the sorted pole ordering
-            residues_upper = residues_raw[:, :, upper_mask][:, :, sort_idx]
-            # Transpose to [n_poles, 4, 4]
+            # Select residues corresponding to upper-half poles and sort to match
+            residues_upper = residues_3d[:, :, upper_mask]
+            if residues_upper.shape[2] < NUM_POLES_COMPLEX:
+                all_res_sorted = residues_3d[:, :, np.argsort(-poles.imag)]
+                residues_upper = all_res_sorted[:, :, :NUM_POLES_COMPLEX]
+            elif residues_upper.shape[2] > NUM_POLES_COMPLEX:
+                sort_by_imag = np.argsort(poles[upper_mask].imag)
+                residues_upper = residues_upper[:, :, sort_by_imag[-NUM_POLES_COMPLEX:]]
+            
+            residues_upper = residues_upper[:, :, sort_idx]
+            # Transpose to [n_poles, 4, 4] to match model convention
             residues_upper = np.transpose(residues_upper, (2, 0, 1))
             
             # Extract direct term (D matrix)
-            d_term = vf.proportional_coeff  # shape: [4, 4]
-            
-            # Scale poles to match model convention (GHz · rad/s)
-            # VF in scikit-rf works with the same frequency units as the Network object.
-            # Our model normalises frequencies by 1e9 (divides Hz by 1e9 to get GHz)
-            # and poles are in GHz·rad/s space. scikit-rf VF returns poles in the
-            # natural units of the frequency axis (rad/s if freq is in Hz, or
-            # GHz·rad/s if freq is in GHz). Since we created the Network with
-            # rf.Frequency in GHz, poles should already be in GHz·rad/s.
-            # Verify and store.
+            d_term = extract_d_term(vf, num_ports=4)
             
             all_poles_real.append(poles_upper.real.astype(np.float32))
             all_poles_imag.append(poles_upper.imag.astype(np.float32))
             all_residues_real.append(residues_upper.real.astype(np.float32))
             all_residues_imag.append(residues_upper.imag.astype(np.float32))
-            all_d_term.append(d_term.real.astype(np.float32))
+            all_d_term.append(d_term.astype(np.float32))
             
         except Exception as e:
             # Some samples may fail VF (ill-conditioned, noisy, etc.)
-            # Record the failure and fill with NaN for later filtering.
-            print(f"\n  [WARN] VF failed for sample {idx}: {e}")
             failed_indices.append(idx)
             all_poles_real.append(np.full(NUM_POLES_COMPLEX, np.nan, dtype=np.float32))
             all_poles_imag.append(np.full(NUM_POLES_COMPLEX, np.nan, dtype=np.float32))
             all_residues_real.append(np.full((NUM_POLES_COMPLEX, 4, 4), np.nan, dtype=np.float32))
             all_residues_imag.append(np.full((NUM_POLES_COMPLEX, 4, 4), np.nan, dtype=np.float32))
             all_d_term.append(np.full((4, 4), np.nan, dtype=np.float32))
+            
+            # Only print first 10 failures to avoid flooding the console
+            if len(failed_indices) <= 10:
+                print(f"\n  [WARN] VF failed for sample {idx}: {e}")
+    
+    elapsed = time.time() - start_time
     
     # Convert to tensors
     vf_targets = {
@@ -166,19 +270,24 @@ def run_vectorfitting_on_dataset(dataset_type='array'):
     torch.save(vf_targets, save_path)
     
     success_count = num_samples - len(failed_indices)
-    print(f"\n[INFO] Vector Fitting complete:")
+    print(f"\n[INFO] Vector Fitting complete ({elapsed:.1f}s):")
     print(f"  Successful: {success_count}/{num_samples}")
     print(f"  Failed:     {len(failed_indices)}/{num_samples}")
     print(f"  Saved to:   {save_path}")
     
+    if len(failed_indices) > 10:
+        print(f"  (Showing first 10 failures only, total: {len(failed_indices)})")
+    
     # Print pole statistics for sanity checking
     valid_mask = ~torch.isnan(vf_targets['poles_real'][:, 0])
-    valid_poles_real = vf_targets['poles_real'][valid_mask]
-    valid_poles_imag = vf_targets['poles_imag'][valid_mask]
-    
-    print(f"\n  Pole real parts:  min={valid_poles_real.min():.4f}, max={valid_poles_real.max():.4f}, mean={valid_poles_real.mean():.4f}")
-    print(f"  Pole imag parts:  min={valid_poles_imag.min():.4f}, max={valid_poles_imag.max():.4f} (GHz·rad/s)")
-    print(f"  Pole freq range:  {valid_poles_imag.min()/(2*np.pi):.2f} to {valid_poles_imag.max()/(2*np.pi):.2f} GHz")
+    if valid_mask.any():
+        valid_poles_real = vf_targets['poles_real'][valid_mask]
+        valid_poles_imag = vf_targets['poles_imag'][valid_mask]
+        
+        print(f"\n  Pole Statistics:")
+        print(f"    Real parts:  min={valid_poles_real.min():.4f}, max={valid_poles_real.max():.4f}, mean={valid_poles_real.mean():.4f}")
+        print(f"    Imag parts:  min={valid_poles_imag.min():.4f}, max={valid_poles_imag.max():.4f} (GHz·rad/s)")
+        print(f"    Freq range:  {valid_poles_imag.min()/(2*np.pi):.2f} to {valid_poles_imag.max()/(2*np.pi):.2f} GHz")
 
 if __name__ == "__main__":
     for dtype in ['array', 'link']:

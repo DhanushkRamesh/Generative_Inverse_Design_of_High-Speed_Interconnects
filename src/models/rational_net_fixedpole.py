@@ -249,7 +249,7 @@ class RationalNet(nn.Module):
         ONLY called during inference (model.eval()). During training, passivity
         is encouraged via a soft penalty in the loss function.
         """
-        jitter = torch.eye(self.num_ports, dtype=S_matrix.dtype, device=S_matrix.device).view(1, 1, self.num_ports, self.num_ports) * 1e-7
+        jitter = torch.eye(4, dtype=S_matrix.dtype, device=S_matrix.device).view(1, 1, 4, 4) * 1e-7
         U, S_vals, Vh = torch.linalg.svd(S_matrix + jitter)
         max_sv = torch.max(S_vals, dim=-1)[0]
         scale = torch.clamp(max_sv, min=1.0 + 1e-6)
