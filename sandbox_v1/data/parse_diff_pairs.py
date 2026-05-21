@@ -120,6 +120,8 @@ def _load_parameter_csv(raw_dir: Path) -> pd.DataFrame:
     df = pd.read_csv(raw_dir / "parameter.csv")
     if "LOSTANGENT" in df.columns and "LOSSTANGENT" not in df.columns:
         df = df.rename(columns={"LOSTANGENT": "LOSSTANGENT"})
+    if "CONDUCTI" in df.columns and "CONDUCTIVITY" not in df.columns:
+        df = df.rename(columns={"CONDUCTI": "CONDUCTIVITY"})
     return df
 
 
@@ -215,7 +217,8 @@ def parse_dataset(
                 continue
 
             num_ports = ntwk.s.shape[1]
-            if num_ports != 2 * int(sim_row["SIGNAL_AMOUNT"]):
+            
+            if dataset_type == "Array" and num_ports != 2 * int(sim_row["SIGNAL_AMOUNT"]):
                 skipped.append(dict(
                     sim_id=sim_id, pair_id=None,
                     reason=f"port count {num_ports} != 2*SIGNAL_AMOUNT "
@@ -258,14 +261,23 @@ def parse_dataset(
                                     reason=f"via_array parse error: {exc}"))
                 continue
 
-            diff_pairs = identify_diff_pairs(parsed)
-            expected_pairs = int(sim_row["SIGNAL_AMOUNT"]) // 2
-            if len(diff_pairs) != expected_pairs:
-                skipped.append(dict(
-                    sim_id=sim_id, pair_id=None,
-                    reason=f"diff-pair count {len(diff_pairs)} != expected {expected_pairs}"
-                ))
-                continue
+            diff_pairs = identify_diff_pairs(parsed, dataset_type)
+            
+            if dataset_type == "Array":
+                expected_pairs = int(sim_row["SIGNAL_AMOUNT"]) // 2
+                if len(diff_pairs) != expected_pairs:
+                    skipped.append(dict(
+                        sim_id=sim_id, pair_id=None,
+                        reason=f"diff-pair count {len(diff_pairs)} != expected {expected_pairs}"
+                    ))
+                    continue
+            elif dataset_type == "Link":
+                if len(diff_pairs) == 0:
+                    skipped.append(dict(
+                        sim_id=sim_id, pair_id=None,
+                        reason="No valid MTL diff links found"
+                    ))
+                    continue
 
             vias_x = int(sim_row["VIAS_X_AMOUNT"])
             vias_y = int(sim_row["VIAS_Y_AMOUNT"])
@@ -276,9 +288,9 @@ def parse_dataset(
             for pair in diff_pairs:
                 pair_id = pair["pair_id"]
                 try:
-                    port_idx = diff_pair_port_indices(
-                        dataset_type, num_ports, pair_id
-                    )
+                    port_idx = pair["port_idx"]
+                    if max(port_idx) >= num_ports:
+                        raise ValueError(f"Pair {pair_id} out of range for {dataset_type} file with {num_ports} ports (computed indices {port_idx})")
                 except ValueError as exc:
                     skipped.append(dict(sim_id=sim_id, pair_id=pair_id,
                                         reason=f"port-index error: {exc}"))

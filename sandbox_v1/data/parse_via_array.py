@@ -154,7 +154,7 @@ def parse_via_array(path: str | Path) -> dict:
 # ---------------------------------------------------------------------------
 # Differential-pair identification
 # ---------------------------------------------------------------------------
-def identify_diff_pairs(parsed: dict) -> list[dict]:
+def identify_diff_pairs(parsed: dict, dataset_type: str = "Array") -> list[dict]:
     """Return a list of differential-pair descriptors, one per pair.
 
     A diff pair is the consecutive odd-even signal-index group:
@@ -165,35 +165,95 @@ def identify_diff_pairs(parsed: dict) -> list[dict]:
       sgn_a, sgn_b   : the two signal indices that make up the pair
       x_a, y_a       : grid position of the first via
       x_b, y_b       : grid position of the second via
+      port_idx       : exact [TX+, TX-, RX+, RX-] indices for this pair
 
     For Array files the (x, y) position is identical for the top (pup) and
     bottom (plw) halves of the same via, so we just take the first one seen.
     For Link files the position is identical between arr_1 and arr_2 (they
     are mirror copies); again we take the first one seen.
     """
-    # Map each unique signal index to its (x, y) position.  First entry wins;
-    # later entries for the same sgn have the same (x, y) by construction.
-    sgn_to_pos: dict[int, tuple[int, int]] = {}
-    for port in parsed["ports"]:
-        sgn = port["sgn"]
-        if sgn not in sgn_to_pos:
-            sgn_to_pos[sgn] = (port["x"], port["y"])
-
     pairs: list[dict] = []
-    sgns_sorted = sorted(sgn_to_pos.keys())
-    # Pair them up two-by-two.  Defensive: if there's an odd number, drop
-    # the last (shouldn't happen because SIGNAL_AMOUNT is always even in
-    # the TUHH dataset, but we don't want a silent crash).
-    for k in range(0, len(sgns_sorted) - 1, 2):
-        sgn_a = sgns_sorted[k]
-        sgn_b = sgns_sorted[k + 1]
-        x_a, y_a = sgn_to_pos[sgn_a]
-        x_b, y_b = sgn_to_pos[sgn_b]
-        pairs.append({
-            "pair_id": k // 2 + 1,
-            "sgn_a": sgn_a, "x_a": x_a, "y_a": y_a,
-            "sgn_b": sgn_b, "x_b": x_b, "y_b": y_b,
-        })
+    
+    if dataset_type == "Array":
+        # Map each unique signal index to its (x, y) position.  First entry wins;
+        # later entries for the same sgn have the same (x, y) by construction.
+        sgn_to_pos: dict[int, tuple[int, int]] = {}
+        for port in parsed["ports"]:
+            sgn = port["sgn"]
+            if sgn not in sgn_to_pos:
+                sgn_to_pos[sgn] = (port["x"], port["y"])
+
+        sgns_sorted = sorted(sgn_to_pos.keys())
+        # Pair them up two-by-two.  Defensive: if there's an odd number, drop
+        # the last (shouldn't happen because SIGNAL_AMOUNT is always even in
+        # the TUHH dataset, but we don't want a silent crash).
+        for k in range(0, len(sgns_sorted) - 1, 2):
+            sgn_a = sgns_sorted[k]
+            sgn_b = sgns_sorted[k + 1]
+            x_a, y_a = sgn_to_pos[sgn_a]
+            x_b, y_b = sgn_to_pos[sgn_b]
+            
+            pair_id = k // 2 + 1
+            base = 4 * (pair_id - 1)
+            port_idx = [base, base + 2, base + 1, base + 3]
+            
+            pairs.append({
+                "pair_id": pair_id,
+                "sgn_a": sgn_a, "x_a": x_a, "y_a": y_a,
+                "sgn_b": sgn_b, "x_b": x_b, "y_b": y_b,
+                "port_idx": port_idx
+            })
+
+    elif dataset_type == "Link":
+        # LINK LOGIC: Group strictly by link_id and dynamically look up line numbers
+        link_groups = {}
+        for p in parsed["ports"]:
+            lnk = p["link"]
+            if lnk is not None:
+                if lnk not in link_groups:
+                    link_groups[lnk] = []
+                link_groups[lnk].append(p)
+
+        pair_counter = 1
+        for lnk, p_list in link_groups.items():
+            unique_sgns = sorted(list(set(p["sgn"] for p in p_list)))
+            
+            # A valid differential link must have exactly 2 signals
+            if len(unique_sgns) != 2:
+                continue
+                
+            sgn_a, sgn_b = unique_sgns[0], unique_sgns[1]
+
+            def find_port(arr_val, sgn_val):
+                for p in p_list:
+                    if p["arr"] == arr_val and p["sgn"] == sgn_val:
+                        return p
+                return None
+
+            p_tx_pos = find_port(1, sgn_a)
+            p_tx_neg = find_port(1, sgn_b)
+            p_rx_pos = find_port(2, sgn_a)
+            p_rx_neg = find_port(2, sgn_b)
+
+            # If the link doesn't have all 4 required ports, drop it (malformed)
+            if not all([p_tx_pos, p_tx_neg, p_rx_pos, p_rx_neg]):
+                continue
+
+            port_idx = [
+                p_tx_pos["port_idx_1based"] - 1,
+                p_tx_neg["port_idx_1based"] - 1,
+                p_rx_pos["port_idx_1based"] - 1,
+                p_rx_neg["port_idx_1based"] - 1,
+            ]
+
+            pairs.append({
+                "pair_id": pair_counter,
+                "sgn_a": sgn_a, "x_a": p_tx_pos["x"], "y_a": p_tx_pos["y"],
+                "sgn_b": sgn_b, "x_b": p_tx_neg["x"], "y_b": p_tx_neg["y"],
+                "port_idx": port_idx
+            })
+            pair_counter += 1
+
     return pairs
 
 
@@ -376,7 +436,7 @@ if __name__ == "__main__":
     # That's a deliberate inconsistency in this test to confirm we don't crash;
     # in real data the grid and port list are always consistent.
 
-    pairs = identify_diff_pairs(fake_parsed)
+    pairs = identify_diff_pairs(fake_parsed, dataset_type="Array")
     print(f"Identified {len(pairs)} diff pair(s):")
     for p in pairs:
         print(f"  pair {p['pair_id']}: sgn{p['sgn_a']} at ({p['x_a']},{p['y_a']}) "
