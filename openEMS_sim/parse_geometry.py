@@ -107,8 +107,8 @@ class ViaSpec:
     net: str                  # 'S', 'G', or 'P'
     grid_x: int               # 1-based grid column coordinate
     grid_y: int               # 1-based grid row coordinate (y=1 is bottom)
-    x_um: float               # physical x in microns
-    y_um: float               # physical y in microns
+    x_mil: float               # physical x in microns
+    y_mil: float               # physical y in microns
     sgn_index: Optional[int]  # signal number (1-based) if net == 'S', else None
 
 
@@ -118,9 +118,9 @@ class LayerSpec:
     index: int                # 1-based layer index from the top
     kind: str                 # 'metal' (G/S/P) or 'dielectric'
     token: str                # original token: 'G','S','P','D/2'
-    z_top_um: float           # top boundary (microns), z increasing downward
-    z_bot_um: float           # bottom boundary (microns)
-    thickness_um: float
+    z_top_mil: float           # top boundary (microns), z increasing downward
+    z_bot_mil: float           # bottom boundary (microns)
+    thickness_mil: float
 
 
 @dataclass
@@ -128,11 +128,11 @@ class GeometryDescription:
     """Everything stage 04 needs to build the OpenEMS model."""
     sim_id: str
     # scalar physical parameters (microns / SI)
-    via_radius_um: float
-    antipad_radius_um: float
-    pitch_um: float
-    tdiel_um: float           # full dielectric thickness (each D/2 is half)
-    tmet_um: float
+    via_radius_mil: float
+    antipad_radius_mil: float
+    pitch_mil: float
+    tdiel_mil: float           # full dielectric thickness (each D/2 is half)
+    tmet_mil: float
     permittivity: float
     conductivity_spm: float   # S/m
     loss_tangent: float
@@ -150,7 +150,7 @@ class GeometryDescription:
     # index i (0-based) is touchstone port i+1
     se_port_map: list[dict] = field(default_factory=list)
     # bookkeeping
-    total_thickness_um: float = 0.0
+    total_thickness_mil: float = 0.0
     n_ports: int = 0
     source: str = "sim_folder"   # or "feature_vector"
 
@@ -173,10 +173,10 @@ class GeometryDescription:
     def summary(self) -> str:
         lines = [
             f"GeometryDescription  sim_id={self.sim_id}  source={self.source}",
-            f"  via_radius   = {self.via_radius_um:.3f} um",
-            f"  antipad_rad  = {self.antipad_radius_um:.3f} um",
-            f"  pitch        = {self.pitch_um:.3f} um",
-            f"  TDIEL/TMET   = {self.tdiel_um:.3f} / {self.tmet_um:.3f} um",
+            f"  via_radius   = {self.via_radius_mil:.3f} um",
+            f"  antipad_rad  = {self.antipad_radius_mil:.3f} um",
+            f"  pitch        = {self.pitch_mil:.3f} um",
+            f"  TDIEL/TMET   = {self.tdiel_mil:.3f} / {self.tmet_mil:.3f} um",
             f"  eps_r        = {self.permittivity:.4f}",
             f"  sigma        = {self.conductivity_spm:.3e} S/m",
             f"  tan(delta)   = {self.loss_tangent:.5f}",
@@ -186,7 +186,7 @@ class GeometryDescription:
             f"  S/G/P vias   = {self.signal_amount}/{self.ground_amount}/"
             f"{self.power_amount}  (total placed: {len(self.vias)})",
             f"  n_ports      = {self.n_ports}  ({self.num_pairs()} diff pairs)",
-            f"  total_thick  = {self.total_thickness_um:.2f} um",
+            f"  total_thick  = {self.total_thickness_mil:.2f} um",
         ]
         return "\n".join(lines)
 
@@ -267,8 +267,8 @@ def _stackup_from_via_array(path: Path) -> list[str]:
     return _parse_via_array_file(path)["layers"]
 
 
-def _build_layers(layer_tokens: list[str], tmet_um: float,
-                  tdiel_um: float) -> list[LayerSpec]:
+def _build_layers(layer_tokens: list[str], tmet_mil: float,
+                  tdiel_mil: float) -> list[LayerSpec]:
     """Convert the layer-token list into physical LayerSpecs with z-heights.
 
     Metal tokens (G/S/P) get thickness = TMET.
@@ -279,23 +279,23 @@ def _build_layers(layer_tokens: list[str], tmet_um: float,
     z = 0.0
     for i, tok in enumerate(layer_tokens):
         if tok in ("G", "S", "P"):
-            th = tmet_um
+            th = tmet_mil
             kind = "metal"
         elif tok == "D/2":
-            th = tdiel_um / 2.0
+            th = tdiel_mil / 2.0
             kind = "dielectric"
         else:
             raise ValueError(f"Unknown stackup token {tok!r} at index {i}")
         layers.append(LayerSpec(
             index=i + 1, kind=kind, token=tok,
-            z_top_um=z, z_bot_um=z + th, thickness_um=th,
+            z_top_mil=z, z_bot_mil=z + th, thickness_mil=th,
         ))
         z += th
     return layers
 
 
 def _build_vias(grid: list[list[str]], ports: list[dict],
-                pitch_um: float) -> list[ViaSpec]:
+                pitch_mil: float) -> list[ViaSpec]:
     """Place every via (S/G/P) from the [ARRAY] grid at its physical xy.
 
     Grid coordinate convention (mirrors grid_to_position_dict):
@@ -317,12 +317,12 @@ def _build_vias(grid: list[list[str]], ports: list[dict],
             net = token[0]                 # 'G','S','P'
             gx = col_idx + 1
             gy = n_rows - row_idx
-            x_um = (gx - 1) * pitch_um
-            y_um = (gy - 1) * pitch_um
+            x_mil = (gx - 1) * pitch_mil
+            y_mil = (gy - 1) * pitch_mil
             sgn = pos_to_sgn.get((gx, gy)) if net == "S" else None
             vias.append(ViaSpec(
                 name=token, net=net, grid_x=gx, grid_y=gy,
-                x_um=x_um, y_um=y_um, sgn_index=sgn,
+                x_mil=x_mil, y_mil=y_mil, sgn_index=sgn,
             ))
     return vias
 
@@ -369,11 +369,11 @@ def from_sim_folder(sim_id: str,
 
     geo = GeometryDescription(
         sim_id=sim_id,
-        via_radius_um=float(row["VIA_RADIUS"]),
-        antipad_radius_um=float(row["ANTIPAD_RADIUS"]),
-        pitch_um=pitch,
-        tdiel_um=tdiel,
-        tmet_um=tmet,
+        via_radius_mil=float(row["VIA_RADIUS"]),
+        antipad_radius_mil=float(row["ANTIPAD_RADIUS"]),
+        pitch_mil=pitch,
+        tdiel_mil=tdiel,
+        tmet_mil=tmet,
         permittivity=float(row["PERMITTIVITY"]),
         conductivity_spm=float(row["CONDUCTIVITY"]),
         loss_tangent=float(row["LOSSTANGENT"]),
@@ -386,7 +386,7 @@ def from_sim_folder(sim_id: str,
         vias=vias,
         layers=layers,
         se_port_map=se_port_map,
-        total_thickness_um=sum(l.thickness_um for l in layers),
+        total_thickness_mil=sum(l.thickness_mil for l in layers),
         n_ports=len(parsed["ports"]),
         source="sim_folder",
     )
@@ -469,11 +469,11 @@ def from_feature_vector(
 
     geo = GeometryDescription(
         sim_id=f"generated_from_{template_sim_id}",
-        via_radius_um=loc["VIA_RADIUS"],
-        antipad_radius_um=loc["ANTIPAD_RADIUS"],
-        pitch_um=pitch,
-        tdiel_um=tdiel,
-        tmet_um=tmet,
+        via_radius_mil=loc["VIA_RADIUS"],
+        antipad_radius_mil=loc["ANTIPAD_RADIUS"],
+        pitch_mil=pitch,
+        tdiel_mil=tdiel,
+        tmet_mil=tmet,
         permittivity=loc["PERMITTIVITY"],
         conductivity_spm=loc["CONDUCTIVITY"],
         loss_tangent=loc["LOSSTANGENT"],
@@ -486,7 +486,7 @@ def from_feature_vector(
         vias=vias,
         layers=layers,
         se_port_map=se_port_map,
-        total_thickness_um=sum(l.thickness_um for l in layers),
+        total_thickness_mil=sum(l.thickness_mil for l in layers),
         n_ports=len(parsed["ports"]),
         source="feature_vector",
     )
@@ -523,8 +523,8 @@ def _selftest() -> None:
 
     # z monotonic + total thickness consistency
     for a, b in zip(geo.layers, geo.layers[1:]):
-        assert b.z_top_um >= a.z_top_um, "layer z not monotonic"
-    print(f"  total stack thickness: {geo.total_thickness_um:.2f} um")
+        assert b.z_top_mil >= a.z_top_mil, "layer z not monotonic"
+    print(f"  total stack thickness: {geo.total_thickness_mil:.2f} um")
 
     print("\nSELF-TEST PASSED")
 

@@ -1,0 +1,31 @@
+==============================================================================
+Stage 04: build array model  (sim_pkg_0017)
+==============================================================================
+GeometryDescription  sim_id=sim_pkg_0017  source=sim_folder
+  via_radius   = 3.295 um
+  antipad_rad  = 20.534 um
+  pitch        = 57.933 um
+  TDIEL/TMET   = 18.250 / 2.172 um
+  eps_r        = 2.9235
+  sigma        = 5.137e+07 S/m
+  tan(delta)   = 0.01341
+  layers(metal)= 48  (stackup entries: 95)
+  grid         = 3 x 5
+  S/G/P vias   = 8/6/1  (total placed: 15)
+  n_ports      = 16  (4 diff pairs)
+  total_thick  = 533.13 um
+
+  ArrayModelBuilder for sim_pkg_0017
+    footprint (mil): x[-57.9,173.8] y[-57.9,289.7]
+    stack height    : 533.13 mil (13541.5 um)
+    metal layers    : 48 (G=24 S=22 P=2)
+    via radius      : 3.295 mil
+    antipad radius  : 20.534 mil
+    mesh resolution : 3.451 mil (20 cells/lambda at 100 GHz)
+    n_ports         : 16
+    [excite port 1/16]
+    [dry-run] wrote /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/runs/04_sim_pkg_0017/model.xml
+    Inspect with: AppCSXCAD /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/runs/04_sim_pkg_0017/model.xml
+
+Dry run complete. Open the XML in AppCSXCAD to inspect the geometry
+before committing to a full solve.
