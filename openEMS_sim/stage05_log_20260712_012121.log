@@ -1,0 +1,2 @@
+usage: baseline_known_geometry.py [-h] [--sim SIM] [--pair PAIR] [--no-openems] [--weights WEIGHTS]
+baseline_known_geometry.py: error: argument --pair: expected one argument

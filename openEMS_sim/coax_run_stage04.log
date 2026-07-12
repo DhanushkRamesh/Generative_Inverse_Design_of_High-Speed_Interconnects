@@ -1,0 +1,636 @@
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1.35084e+06 FDTD cells 
+FDTD timestep is: 1.41878e-13 s; Nyquist rate: 35 timesteps @1.0069e+11 Hz
+Excitation signal length is: 405 timesteps (5.74605e-11s)
+Max. number of timesteps: 60000 ( --> 148.148 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          264 || Speed:   87.3 MC/s (1.547e-02 s/TS) || Energy: ~4.19e-18 (- 0.00dB)
+[@        8s] Timestep:          672 || Speed:  137.5 MC/s (9.822e-03 s/TS) || Energy: ~9.33e-19 (- 6.52dB)
+[@       12s] Timestep:         1136 || Speed:  156.1 MC/s (8.655e-03 s/TS) || Energy: ~2.51e-19 (-12.23dB)
+[@       16s] Timestep:         1696 || Speed:  188.1 MC/s (7.183e-03 s/TS) || Energy: ~8.79e-20 (-16.78dB)
+[@       20s] Timestep:         2144 || Speed:  150.8 MC/s (8.959e-03 s/TS) || Energy: ~3.77e-20 (-20.45dB)
+Multithreaded Engine: Best performance found using 4 threads.
+[@       24s] Timestep:         2616 || Speed:  158.0 MC/s (8.550e-03 s/TS) || Energy: ~2.00e-20 (-23.22dB)
+[@       28s] Timestep:         3080 || Speed:  156.0 MC/s (8.661e-03 s/TS) || Energy: ~9.60e-21 (-26.40dB)
+[@       32s] Timestep:         3544 || Speed:  155.5 MC/s (8.685e-03 s/TS) || Energy: ~4.30e-21 (-29.88dB)
+[@       36s] Timestep:         4032 || Speed:  162.3 MC/s (8.321e-03 s/TS) || Energy: ~2.26e-21 (-32.68dB)
+[@       40s] Timestep:         4520 || Speed:  163.6 MC/s (8.259e-03 s/TS) || Energy: ~1.16e-21 (-35.58dB)
+[@       44s] Timestep:         5096 || Speed:  192.5 MC/s (7.016e-03 s/TS) || Energy: ~6.77e-22 (-37.92dB)
+[@       48s] Timestep:         5568 || Speed:  158.2 MC/s (8.537e-03 s/TS) || Energy: ~3.38e-22 (-40.93dB)
+Time for 5568 iterations with 1350837.00 cells : 48.39 sec
+Speed: 155.43 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          256 || Speed:   85.8 MC/s (1.574e-02 s/TS) || Energy: ~1.25e-17 (- 0.00dB)
+[@        8s] Timestep:          632 || Speed:  126.5 MC/s (1.068e-02 s/TS) || Energy: ~3.26e-18 (- 5.83dB)
+[@       12s] Timestep:         1064 || Speed:  145.2 MC/s (9.304e-03 s/TS) || Energy: ~8.69e-19 (-11.58dB)
+[@       16s] Timestep:         1496 || Speed:  143.4 MC/s (9.420e-03 s/TS) || Energy: ~3.58e-19 (-15.44dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         1936 || Speed:  148.0 MC/s (9.124e-03 s/TS) || Energy: ~1.80e-19 (-18.41dB)
+[@       24s] Timestep:         2456 || Speed:  174.0 MC/s (7.763e-03 s/TS) || Energy: ~7.43e-20 (-22.26dB)
+[@       28s] Timestep:         2896 || Speed:  148.4 MC/s (9.102e-03 s/TS) || Energy: ~3.48e-20 (-25.55dB)
+[@       32s] Timestep:         3344 || Speed:  149.3 MC/s (9.048e-03 s/TS) || Energy: ~2.02e-20 (-27.91dB)
+[@       36s] Timestep:         3776 || Speed:  145.6 MC/s (9.280e-03 s/TS) || Energy: ~9.84e-21 (-31.04dB)
+[@       40s] Timestep:         4216 || Speed:  145.7 MC/s (9.270e-03 s/TS) || Energy: ~5.82e-21 (-33.33dB)
+[@       44s] Timestep:         4656 || Speed:  147.5 MC/s (9.157e-03 s/TS) || Energy: ~3.08e-21 (-36.09dB)
+[@       48s] Timestep:         5096 || Speed:  147.9 MC/s (9.134e-03 s/TS) || Energy: ~2.09e-21 (-37.77dB)
+[@       52s] Timestep:         5536 || Speed:  146.6 MC/s (9.216e-03 s/TS) || Energy: ~1.24e-21 (-40.04dB)
+Time for 5536 iterations with 1350837.00 cells : 52.43 sec
+Speed: 142.62 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          256 || Speed:   84.2 MC/s (1.604e-02 s/TS) || Energy: ~3.83e-18 (- 0.00dB)
+[@        8s] Timestep:          648 || Speed:  131.5 MC/s (1.027e-02 s/TS) || Energy: ~9.11e-19 (- 6.24dB)
+[@       12s] Timestep:         1088 || Speed:  147.9 MC/s (9.132e-03 s/TS) || Energy: ~2.77e-19 (-11.41dB)
+[@       16s] Timestep:         1544 || Speed:  153.2 MC/s (8.817e-03 s/TS) || Energy: ~1.10e-19 (-15.43dB)
+[@       20s] Timestep:         1992 || Speed:  149.0 MC/s (9.065e-03 s/TS) || Energy: ~4.83e-20 (-19.00dB)
+Multithreaded Engine: Best performance found using 4 threads.
+[@       24s] Timestep:         2424 || Speed:  145.8 MC/s (9.263e-03 s/TS) || Energy: ~2.31e-20 (-22.20dB)
+[@       28s] Timestep:         2864 || Speed:  148.6 MC/s (9.093e-03 s/TS) || Energy: ~1.21e-20 (-25.00dB)
+[@       32s] Timestep:         3400 || Speed:  179.4 MC/s (7.529e-03 s/TS) || Energy: ~4.94e-21 (-28.89dB)
+[@       36s] Timestep:         3848 || Speed:  150.7 MC/s (8.966e-03 s/TS) || Energy: ~2.81e-21 (-31.35dB)
+[@       40s] Timestep:         4272 || Speed:  143.1 MC/s (9.438e-03 s/TS) || Energy: ~1.63e-21 (-33.71dB)
+[@       44s] Timestep:         4728 || Speed:  151.4 MC/s (8.925e-03 s/TS) || Energy: ~8.59e-22 (-36.50dB)
+[@       48s] Timestep:         5184 || Speed:  152.5 MC/s (8.860e-03 s/TS) || Energy: ~4.14e-22 (-39.67dB)
+[@       52s] Timestep:         5624 || Speed:  146.7 MC/s (9.205e-03 s/TS) || Energy: ~2.55e-22 (-41.76dB)
+Time for 5624 iterations with 1350837.00 cells : 52.45 sec
+Speed: 144.84 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          296 || Speed:   98.8 MC/s (1.367e-02 s/TS) || Energy: ~1.11e-17 (- 0.21dB)
+[@        8s] Timestep:          696 || Speed:  134.6 MC/s (1.004e-02 s/TS) || Energy: ~2.33e-18 (- 7.00dB)
+[@       12s] Timestep:         1152 || Speed:  153.5 MC/s (8.803e-03 s/TS) || Energy: ~6.66e-19 (-12.44dB)
+[@       16s] Timestep:         1600 || Speed:  151.1 MC/s (8.939e-03 s/TS) || Energy: ~2.69e-19 (-16.38dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         2048 || Speed:  149.1 MC/s (9.060e-03 s/TS) || Energy: ~1.32e-19 (-19.48dB)
+[@       24s] Timestep:         2504 || Speed:  152.2 MC/s (8.878e-03 s/TS) || Energy: ~6.66e-20 (-22.44dB)
+[@       28s] Timestep:         2960 || Speed:  152.7 MC/s (8.844e-03 s/TS) || Energy: ~3.39e-20 (-25.37dB)
+[@       32s] Timestep:         3416 || Speed:  153.3 MC/s (8.811e-03 s/TS) || Energy: ~1.54e-20 (-28.79dB)
+[@       36s] Timestep:         3936 || Speed:  173.2 MC/s (7.798e-03 s/TS) || Energy: ~7.72e-21 (-31.80dB)
+[@       40s] Timestep:         4392 || Speed:  151.9 MC/s (8.894e-03 s/TS) || Energy: ~4.13e-21 (-34.52dB)
+[@       44s] Timestep:         4848 || Speed:  152.0 MC/s (8.884e-03 s/TS) || Energy: ~2.30e-21 (-37.05dB)
+[@       48s] Timestep:         5296 || Speed:  151.1 MC/s (8.943e-03 s/TS) || Energy: ~1.27e-21 (-39.62dB)
+[@       52s] Timestep:         5752 || Speed:  151.4 MC/s (8.921e-03 s/TS) || Energy: ~8.02e-22 (-41.63dB)
+Time for 5752 iterations with 1350837.00 cells : 52.48 sec
+Speed: 148.06 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          256 || Speed:   86.0 MC/s (1.570e-02 s/TS) || Energy: ~3.93e-18 (- 0.00dB)
+[@        8s] Timestep:          648 || Speed:  131.0 MC/s (1.031e-02 s/TS) || Energy: ~9.99e-19 (- 5.95dB)
+[@       12s] Timestep:         1176 || Speed:  176.7 MC/s (7.643e-03 s/TS) || Energy: ~2.21e-19 (-12.50dB)
+[@       16s] Timestep:         1624 || Speed:  149.4 MC/s (9.041e-03 s/TS) || Energy: ~8.06e-20 (-16.88dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         2072 || Speed:  150.7 MC/s (8.962e-03 s/TS) || Energy: ~3.67e-20 (-20.29dB)
+[@       24s] Timestep:         2528 || Speed:  152.6 MC/s (8.854e-03 s/TS) || Energy: ~1.89e-20 (-23.18dB)
+[@       28s] Timestep:         2976 || Speed:  150.7 MC/s (8.965e-03 s/TS) || Energy: ~8.77e-21 (-26.51dB)
+[@       32s] Timestep:         3424 || Speed:  150.9 MC/s (8.951e-03 s/TS) || Energy: ~4.96e-21 (-28.99dB)
+[@       36s] Timestep:         3872 || Speed:  151.2 MC/s (8.933e-03 s/TS) || Energy: ~2.69e-21 (-31.64dB)
+[@       40s] Timestep:         4392 || Speed:  172.6 MC/s (7.828e-03 s/TS) || Energy: ~1.34e-21 (-34.67dB)
+[@       44s] Timestep:         4832 || Speed:  146.3 MC/s (9.233e-03 s/TS) || Energy: ~7.37e-22 (-37.27dB)
+[@       48s] Timestep:         5256 || Speed:  141.6 MC/s (9.542e-03 s/TS) || Energy: ~4.88e-22 (-39.06dB)
+[@       52s] Timestep:         5680 || Speed:  140.9 MC/s (9.587e-03 s/TS) || Energy: ~2.85e-22 (-41.39dB)
+Time for 5680 iterations with 1350837.00 cells : 52.47 sec
+Speed: 146.22 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          240 || Speed:   80.8 MC/s (1.673e-02 s/TS) || Energy: ~1.06e-17 (- 0.40dB)
+[@        8s] Timestep:          616 || Speed:  124.8 MC/s (1.083e-02 s/TS) || Energy: ~3.41e-18 (- 5.34dB)
+[@       12s] Timestep:         1048 || Speed:  143.8 MC/s (9.394e-03 s/TS) || Energy: ~8.81e-19 (-11.23dB)
+[@       16s] Timestep:         1552 || Speed:  168.4 MC/s (8.023e-03 s/TS) || Energy: ~3.01e-19 (-15.89dB)
+[@       20s] Timestep:         1968 || Speed:  138.6 MC/s (9.747e-03 s/TS) || Energy: ~1.34e-19 (-19.39dB)
+Multithreaded Engine: Best performance found using 4 threads.
+[@       24s] Timestep:         2408 || Speed:  146.3 MC/s (9.232e-03 s/TS) || Energy: ~6.73e-20 (-22.40dB)
+[@       28s] Timestep:         2848 || Speed:  146.3 MC/s (9.234e-03 s/TS) || Energy: ~3.63e-20 (-25.08dB)
+[@       32s] Timestep:         3296 || Speed:  149.5 MC/s (9.036e-03 s/TS) || Energy: ~1.79e-20 (-28.14dB)
+[@       36s] Timestep:         3744 || Speed:  150.0 MC/s (9.004e-03 s/TS) || Energy: ~1.07e-20 (-30.38dB)
+[@       40s] Timestep:         4184 || Speed:  148.1 MC/s (9.120e-03 s/TS) || Energy: ~5.16e-21 (-33.55dB)
+[@       44s] Timestep:         4632 || Speed:  150.8 MC/s (8.957e-03 s/TS) || Energy: ~2.92e-21 (-36.02dB)
+[@       48s] Timestep:         5152 || Speed:  175.1 MC/s (7.715e-03 s/TS) || Energy: ~1.56e-21 (-38.75dB)
+[@       52s] Timestep:         5608 || Speed:  152.3 MC/s (8.872e-03 s/TS) || Energy: ~8.85e-22 (-41.21dB)
+Time for 5608 iterations with 1350837.00 cells : 52.53 sec
+Speed: 144.21 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          256 || Speed:   84.9 MC/s (1.590e-02 s/TS) || Energy: ~3.81e-18 (- 0.00dB)
+[@        8s] Timestep:          664 || Speed:  136.6 MC/s (9.890e-03 s/TS) || Energy: ~8.11e-19 (- 6.72dB)
+[@       12s] Timestep:         1128 || Speed:  155.8 MC/s (8.669e-03 s/TS) || Energy: ~1.90e-19 (-13.01dB)
+[@       16s] Timestep:         1584 || Speed:  151.8 MC/s (8.899e-03 s/TS) || Energy: ~7.15e-20 (-17.27dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         2048 || Speed:  155.1 MC/s (8.709e-03 s/TS) || Energy: ~3.07e-20 (-20.94dB)
+[@       24s] Timestep:         2560 || Speed:  170.1 MC/s (7.942e-03 s/TS) || Energy: ~1.26e-20 (-24.81dB)
+[@       28s] Timestep:         3008 || Speed:  149.1 MC/s (9.057e-03 s/TS) || Energy: ~6.26e-21 (-27.84dB)
+[@       32s] Timestep:         3456 || Speed:  149.3 MC/s (9.047e-03 s/TS) || Energy: ~3.48e-21 (-30.39dB)
+[@       36s] Timestep:         3904 || Speed:  151.0 MC/s (8.946e-03 s/TS) || Energy: ~1.76e-21 (-33.34dB)
+[@       40s] Timestep:         4352 || Speed:  149.7 MC/s (9.026e-03 s/TS) || Energy: ~9.77e-22 (-35.91dB)
+[@       44s] Timestep:         4792 || Speed:  146.4 MC/s (9.228e-03 s/TS) || Energy: ~5.72e-22 (-38.23dB)
+[@       48s] Timestep:         5248 || Speed:  151.4 MC/s (8.925e-03 s/TS) || Energy: ~3.55e-22 (-40.31dB)
+Time for 5248 iterations with 1350837.00 cells : 48.59 sec
+Speed: 145.91 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          248 || Speed:   82.8 MC/s (1.631e-02 s/TS) || Energy: ~1.09e-17 (- 0.28dB)
+[@        8s] Timestep:          624 || Speed:  126.6 MC/s (1.067e-02 s/TS) || Energy: ~2.96e-18 (- 5.94dB)
+[@       12s] Timestep:         1056 || Speed:  145.3 MC/s (9.294e-03 s/TS) || Energy: ~7.15e-19 (-12.11dB)
+[@       16s] Timestep:         1496 || Speed:  146.9 MC/s (9.194e-03 s/TS) || Energy: ~2.75e-19 (-16.26dB)
+[@       20s] Timestep:         1936 || Speed:  146.7 MC/s (9.211e-03 s/TS) || Energy: ~1.21e-19 (-19.84dB)
+Multithreaded Engine: Best performance found using 4 threads.
+[@       24s] Timestep:         2384 || Speed:  149.1 MC/s (9.059e-03 s/TS) || Energy: ~5.53e-20 (-23.23dB)
+[@       28s] Timestep:         2832 || Speed:  149.9 MC/s (9.011e-03 s/TS) || Energy: ~2.82e-20 (-26.14dB)
+[@       32s] Timestep:         3352 || Speed:  173.0 MC/s (7.808e-03 s/TS) || Energy: ~1.32e-20 (-29.45dB)
+[@       36s] Timestep:         3800 || Speed:  149.4 MC/s (9.040e-03 s/TS) || Energy: ~6.91e-21 (-32.26dB)
+[@       40s] Timestep:         4240 || Speed:  146.7 MC/s (9.206e-03 s/TS) || Energy: ~3.78e-21 (-34.88dB)
+[@       44s] Timestep:         4680 || Speed:  146.2 MC/s (9.242e-03 s/TS) || Energy: ~2.03e-21 (-37.57dB)
+[@       48s] Timestep:         5120 || Speed:  146.3 MC/s (9.231e-03 s/TS) || Energy: ~1.35e-21 (-39.36dB)
+[@       52s] Timestep:         5560 || Speed:  146.3 MC/s (9.232e-03 s/TS) || Energy: ~7.67e-22 (-41.80dB)
+Time for 5560 iterations with 1350837.00 cells : 52.62 sec
+Speed: 142.74 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          256 || Speed:   86.0 MC/s (1.570e-02 s/TS) || Energy: ~4.02e-18 (- 0.00dB)
+[@        8s] Timestep:          720 || Speed:  155.8 MC/s (8.669e-03 s/TS) || Energy: ~6.57e-19 (- 7.87dB)
+[@       12s] Timestep:         1184 || Speed:  155.9 MC/s (8.666e-03 s/TS) || Energy: ~1.64e-19 (-13.89dB)
+[@       16s] Timestep:         1632 || Speed:  148.9 MC/s (9.074e-03 s/TS) || Energy: ~5.82e-20 (-18.39dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         2072 || Speed:  148.5 MC/s (9.097e-03 s/TS) || Energy: ~2.51e-20 (-22.04dB)
+[@       24s] Timestep:         2520 || Speed:  151.3 MC/s (8.930e-03 s/TS) || Energy: ~1.30e-20 (-24.91dB)
+[@       28s] Timestep:         2976 || Speed:  151.8 MC/s (8.899e-03 s/TS) || Energy: ~6.12e-21 (-28.18dB)
+[@       32s] Timestep:         3432 || Speed:  151.9 MC/s (8.890e-03 s/TS) || Energy: ~3.24e-21 (-30.94dB)
+[@       36s] Timestep:         3968 || Speed:  179.3 MC/s (7.536e-03 s/TS) || Energy: ~1.54e-21 (-34.16dB)
+[@       40s] Timestep:         4424 || Speed:  153.4 MC/s (8.806e-03 s/TS) || Energy: ~9.03e-22 (-36.49dB)
+[@       44s] Timestep:         4880 || Speed:  153.2 MC/s (8.818e-03 s/TS) || Energy: ~5.79e-22 (-38.42dB)
+[@       48s] Timestep:         5336 || Speed:  151.7 MC/s (8.904e-03 s/TS) || Energy: ~4.08e-22 (-39.94dB)
+[@       52s] Timestep:         5760 || Speed:  143.2 MC/s (9.436e-03 s/TS) || Energy: ~2.90e-22 (-41.42dB)
+Time for 5760 iterations with 1350837.00 cells : 52.38 sec
+Speed: 148.54 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          256 || Speed:   85.0 MC/s (1.589e-02 s/TS) || Energy: ~1.28e-17 (- 0.00dB)
+[@        8s] Timestep:          656 || Speed:  132.4 MC/s (1.020e-02 s/TS) || Energy: ~2.62e-18 (- 6.89dB)
+[@       12s] Timestep:         1152 || Speed:  165.2 MC/s (8.175e-03 s/TS) || Energy: ~5.00e-19 (-14.08dB)
+[@       16s] Timestep:         1584 || Speed:  144.2 MC/s (9.370e-03 s/TS) || Energy: ~1.98e-19 (-18.10dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         2024 || Speed:  146.8 MC/s (9.205e-03 s/TS) || Energy: ~9.37e-20 (-21.35dB)
+[@       24s] Timestep:         2472 || Speed:  150.1 MC/s (9.000e-03 s/TS) || Energy: ~4.65e-20 (-24.40dB)
+[@       28s] Timestep:         2920 || Speed:  149.8 MC/s (9.015e-03 s/TS) || Energy: ~2.16e-20 (-27.72dB)
+[@       32s] Timestep:         3360 || Speed:  146.6 MC/s (9.213e-03 s/TS) || Energy: ~1.17e-20 (-30.40dB)
+[@       36s] Timestep:         3792 || Speed:  144.3 MC/s (9.361e-03 s/TS) || Energy: ~6.43e-21 (-32.99dB)
+[@       40s] Timestep:         4248 || Speed:  151.5 MC/s (8.917e-03 s/TS) || Energy: ~3.79e-21 (-35.28dB)
+[@       44s] Timestep:         4776 || Speed:  177.2 MC/s (7.625e-03 s/TS) || Energy: ~2.08e-21 (-37.89dB)
+[@       48s] Timestep:         5216 || Speed:  146.7 MC/s (9.207e-03 s/TS) || Energy: ~1.46e-21 (-39.43dB)
+[@       52s] Timestep:         5640 || Speed:  140.9 MC/s (9.587e-03 s/TS) || Energy: ~1.04e-21 (-40.92dB)
+Time for 5640 iterations with 1350837.00 cells : 52.68 sec
+Speed: 144.62 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          240 || Speed:   80.4 MC/s (1.679e-02 s/TS) || Energy: ~3.36e-18 (- 0.52dB)
+[@        8s] Timestep:          608 || Speed:  122.9 MC/s (1.099e-02 s/TS) || Energy: ~1.11e-18 (- 5.31dB)
+[@       12s] Timestep:         1048 || Speed:  148.0 MC/s (9.128e-03 s/TS) || Energy: ~3.06e-19 (-10.92dB)
+[@       16s] Timestep:         1568 || Speed:  174.6 MC/s (7.735e-03 s/TS) || Energy: ~9.87e-20 (-15.83dB)
+[@       20s] Timestep:         2008 || Speed:  146.0 MC/s (9.255e-03 s/TS) || Energy: ~4.67e-20 (-19.08dB)
+Multithreaded Engine: Best performance found using 4 threads.
+[@       24s] Timestep:         2456 || Speed:  150.0 MC/s (9.005e-03 s/TS) || Energy: ~2.03e-20 (-22.71dB)
+[@       28s] Timestep:         2904 || Speed:  149.6 MC/s (9.030e-03 s/TS) || Energy: ~9.95e-21 (-25.80dB)
+[@       32s] Timestep:         3344 || Speed:  146.4 MC/s (9.228e-03 s/TS) || Energy: ~5.97e-21 (-28.01dB)
+[@       36s] Timestep:         3792 || Speed:  148.9 MC/s (9.073e-03 s/TS) || Energy: ~2.96e-21 (-31.07dB)
+[@       40s] Timestep:         4232 || Speed:  146.9 MC/s (9.195e-03 s/TS) || Energy: ~1.65e-21 (-33.59dB)
+[@       44s] Timestep:         4680 || Speed:  149.2 MC/s (9.054e-03 s/TS) || Energy: ~8.69e-22 (-36.38dB)
+[@       48s] Timestep:         5200 || Speed:  173.8 MC/s (7.771e-03 s/TS) || Energy: ~5.04e-22 (-38.75dB)
+[@       52s] Timestep:         5624 || Speed:  140.5 MC/s (9.612e-03 s/TS) || Energy: ~3.35e-22 (-40.53dB)
+Time for 5624 iterations with 1350837.00 cells : 52.61 sec
+Speed: 144.40 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          240 || Speed:   78.8 MC/s (1.714e-02 s/TS) || Energy: ~1.06e-17 (- 0.41dB)
+[@        8s] Timestep:          616 || Speed:  125.5 MC/s (1.077e-02 s/TS) || Energy: ~3.28e-18 (- 5.52dB)
+[@       12s] Timestep:         1048 || Speed:  143.5 MC/s (9.416e-03 s/TS) || Energy: ~9.23e-19 (-11.03dB)
+[@       16s] Timestep:         1496 || Speed:  149.6 MC/s (9.032e-03 s/TS) || Energy: ~3.64e-19 (-15.07dB)
+[@       20s] Timestep:         1960 || Speed:  154.3 MC/s (8.757e-03 s/TS) || Energy: ~1.44e-19 (-19.08dB)
+[@       24s] Timestep:         2456 || Speed:  166.7 MC/s (8.105e-03 s/TS) || Energy: ~6.44e-20 (-22.59dB)
+[@       28s] Timestep:         2872 || Speed:  137.9 MC/s (9.796e-03 s/TS) || Energy: ~3.58e-20 (-25.14dB)
+Multithreaded Engine: Best performance found using 6 threads.
+[@       32s] Timestep:         3264 || Speed:  132.1 MC/s (1.023e-02 s/TS) || Energy: ~1.92e-20 (-27.83dB)
+[@       36s] Timestep:         3664 || Speed:  132.7 MC/s (1.018e-02 s/TS) || Energy: ~1.14e-20 (-30.11dB)
+[@       40s] Timestep:         4080 || Speed:  139.4 MC/s (9.693e-03 s/TS) || Energy: ~6.84e-21 (-32.33dB)
+[@       44s] Timestep:         4496 || Speed:  137.8 MC/s (9.799e-03 s/TS) || Energy: ~3.66e-21 (-35.04dB)
+[@       48s] Timestep:         4904 || Speed:  135.7 MC/s (9.954e-03 s/TS) || Energy: ~2.29e-21 (-37.09dB)
+[@       52s] Timestep:         5304 || Speed:  134.8 MC/s (1.002e-02 s/TS) || Energy: ~1.57e-21 (-38.73dB)
+[@       56s] Timestep:         5752 || Speed:  149.2 MC/s (9.051e-03 s/TS) || Energy: ~9.93e-22 (-40.71dB)
+Time for 5752 iterations with 1350837.00 cells : 56.75 sec
+Speed: 136.92 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          248 || Speed:   82.1 MC/s (1.646e-02 s/TS) || Energy: ~3.58e-18 (- 0.31dB)
+[@        8s] Timestep:          608 || Speed:  120.0 MC/s (1.126e-02 s/TS) || Energy: ~9.26e-19 (- 6.19dB)
+[@       12s] Timestep:         1032 || Speed:  142.5 MC/s (9.479e-03 s/TS) || Energy: ~2.52e-19 (-11.84dB)
+[@       16s] Timestep:         1464 || Speed:  143.9 MC/s (9.385e-03 s/TS) || Energy: ~9.33e-20 (-16.16dB)
+[@       20s] Timestep:         1880 || Speed:  140.1 MC/s (9.643e-03 s/TS) || Energy: ~3.95e-20 (-19.90dB)
+Multithreaded Engine: Best performance found using 4 threads.
+[@       24s] Timestep:         2384 || Speed:  167.4 MC/s (8.069e-03 s/TS) || Energy: ~1.56e-20 (-23.94dB)
+[@       28s] Timestep:         2816 || Speed:  145.9 MC/s (9.260e-03 s/TS) || Energy: ~8.72e-21 (-26.45dB)
+[@       32s] Timestep:         3248 || Speed:  144.1 MC/s (9.375e-03 s/TS) || Energy: ~4.11e-21 (-29.72dB)
+[@       36s] Timestep:         3672 || Speed:  142.2 MC/s (9.497e-03 s/TS) || Energy: ~2.08e-21 (-32.68dB)
+[@       40s] Timestep:         4104 || Speed:  144.7 MC/s (9.335e-03 s/TS) || Energy: ~1.33e-21 (-34.61dB)
+[@       44s] Timestep:         4536 || Speed:  144.7 MC/s (9.334e-03 s/TS) || Energy: ~6.81e-22 (-37.53dB)
+[@       48s] Timestep:         4968 || Speed:  145.5 MC/s (9.284e-03 s/TS) || Energy: ~4.54e-22 (-39.29dB)
+[@       52s] Timestep:         5400 || Speed:  144.5 MC/s (9.348e-03 s/TS) || Energy: ~2.97e-22 (-41.13dB)
+Time for 5400 iterations with 1350837.00 cells : 52.48 sec
+Speed: 139.00 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          248 || Speed:   82.4 MC/s (1.640e-02 s/TS) || Energy: ~1.14e-17 (- 0.18dB)
+[@        8s] Timestep:          624 || Speed:  125.2 MC/s (1.079e-02 s/TS) || Energy: ~2.72e-18 (- 6.39dB)
+[@       12s] Timestep:         1072 || Speed:  149.7 MC/s (9.022e-03 s/TS) || Energy: ~6.66e-19 (-12.51dB)
+[@       16s] Timestep:         1520 || Speed:  149.8 MC/s (9.017e-03 s/TS) || Energy: ~2.42e-19 (-16.92dB)
+[@       20s] Timestep:         1968 || Speed:  148.7 MC/s (9.084e-03 s/TS) || Energy: ~1.08e-19 (-20.40dB)
+Multithreaded Engine: Best performance found using 4 threads.
+[@       24s] Timestep:         2424 || Speed:  152.3 MC/s (8.872e-03 s/TS) || Energy: ~5.11e-20 (-23.66dB)
+[@       28s] Timestep:         2880 || Speed:  152.2 MC/s (8.877e-03 s/TS) || Energy: ~2.37e-20 (-27.00dB)
+[@       32s] Timestep:         3416 || Speed:  178.5 MC/s (7.570e-03 s/TS) || Energy: ~1.06e-20 (-30.51dB)
+[@       36s] Timestep:         3864 || Speed:  150.9 MC/s (8.949e-03 s/TS) || Energy: ~5.45e-21 (-33.38dB)
+[@       40s] Timestep:         4320 || Speed:  151.5 MC/s (8.914e-03 s/TS) || Energy: ~3.12e-21 (-35.81dB)
+[@       44s] Timestep:         4768 || Speed:  149.4 MC/s (9.043e-03 s/TS) || Energy: ~1.78e-21 (-38.25dB)
+[@       48s] Timestep:         5224 || Speed:  151.5 MC/s (8.916e-03 s/TS) || Energy: ~1.13e-21 (-40.20dB)
+Time for 5224 iterations with 1350837.00 cells : 48.62 sec
+Speed: 145.15 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          248 || Speed:   82.3 MC/s (1.640e-02 s/TS) || Energy: ~3.50e-18 (- 0.33dB)
+[@        8s] Timestep:          640 || Speed:  131.2 MC/s (1.030e-02 s/TS) || Energy: ~1.10e-18 (- 5.38dB)
+[@       12s] Timestep:         1160 || Speed:  173.4 MC/s (7.789e-03 s/TS) || Energy: ~2.93e-19 (-11.11dB)
+[@       16s] Timestep:         1608 || Speed:  150.3 MC/s (8.989e-03 s/TS) || Energy: ~1.05e-19 (-15.57dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         2056 || Speed:  150.4 MC/s (8.981e-03 s/TS) || Energy: ~4.75e-20 (-19.01dB)
+[@       24s] Timestep:         2512 || Speed:  151.7 MC/s (8.903e-03 s/TS) || Energy: ~2.28e-20 (-22.19dB)
+[@       28s] Timestep:         2952 || Speed:  146.5 MC/s (9.224e-03 s/TS) || Energy: ~1.20e-20 (-24.97dB)
+[@       32s] Timestep:         3384 || Speed:  145.6 MC/s (9.281e-03 s/TS) || Energy: ~5.08e-21 (-28.72dB)
+[@       36s] Timestep:         3832 || Speed:  149.5 MC/s (9.037e-03 s/TS) || Energy: ~3.18e-21 (-30.75dB)
+[@       40s] Timestep:         4280 || Speed:  150.1 MC/s (9.002e-03 s/TS) || Energy: ~1.60e-21 (-33.73dB)
+[@       44s] Timestep:         4712 || Speed:  143.3 MC/s (9.426e-03 s/TS) || Energy: ~8.68e-22 (-36.39dB)
+[@       48s] Timestep:         5128 || Speed:  140.4 MC/s (9.624e-03 s/TS) || Energy: ~5.78e-22 (-38.16dB)
+[@       52s] Timestep:         5568 || Speed:  146.8 MC/s (9.205e-03 s/TS) || Energy: ~3.11e-22 (-40.85dB)
+Time for 5568 iterations with 1350837.00 cells : 52.54 sec
+Speed: 143.15 MCells/s 
+ ---------------------------------------------------------------------- 
+ | openEMS 64bit -- version v0.0.36-142-g32c5c6b
+ | (C) 2010-2025 Thorsten Liebig <thorsten.liebig@gmx.de>  GPL license
+ ---------------------------------------------------------------------- 
+	Used external libraries:
+		CSXCAD -- Version: v0.6.3-100-gd7d70ef
+		hdf5   -- Version: 1.10.10
+		          compiled against: HDF5 library version: 1.10.10
+		tinyxml -- compiled against: 2.6.2
+		fparser
+		boost  -- compiled against: 1_83
+		vtk -- Version: 9.1.0
+		       compiled against: 9.1.0
+
+Create FDTD operator (compressed SSE + multi-threading)
+FDTD simulation size: 81x109x153 --> 1350837.00 FDTD cells 
+FDTD timestep is: 0.00 s; Nyquist rate: 35 timesteps @100690294886.00 Hz
+Excitation signal length is: 405 timesteps (0.00s)
+Max. number of timesteps: 60000 ( --> 148.15 * Excitation signal length)
+Create FDTD engine (compressed SSE + multi-threading)
+Running FDTD engine... this may take a while... grab a cup of coffee?!?
+[@        4s] Timestep:          256 || Speed:   83.9 MC/s (1.611e-02 s/TS) || Energy: ~1.25e-17 (- 0.00dB)
+[@        8s] Timestep:          632 || Speed:  126.0 MC/s (1.072e-02 s/TS) || Energy: ~3.47e-18 (- 5.57dB)
+[@       12s] Timestep:         1072 || Speed:  146.5 MC/s (9.223e-03 s/TS) || Energy: ~9.77e-19 (-11.08dB)
+[@       16s] Timestep:         1504 || Speed:  145.4 MC/s (9.291e-03 s/TS) || Energy: ~3.85e-19 (-15.13dB)
+Multithreaded Engine: Best performance found using 3 threads.
+[@       20s] Timestep:         1944 || Speed:  146.4 MC/s (9.229e-03 s/TS) || Energy: ~1.77e-19 (-18.49dB)
+[@       24s] Timestep:         2384 || Speed:  147.4 MC/s (9.164e-03 s/TS) || Energy: ~8.43e-20 (-21.72dB)
+[@       28s] Timestep:         2824 || Speed:  146.3 MC/s (9.232e-03 s/TS) || Energy: ~4.34e-20 (-24.60dB)
+[@       32s] Timestep:         3312 || Speed:  163.9 MC/s (8.241e-03 s/TS) || Energy: ~2.04e-20 (-27.88dB)
+[@       36s] Timestep:         3744 || Speed:  143.3 MC/s (9.426e-03 s/TS) || Energy: ~1.00e-20 (-30.96dB)
+[@       40s] Timestep:         4168 || Speed:  142.1 MC/s (9.508e-03 s/TS) || Energy: ~4.99e-21 (-34.00dB)
+[@       44s] Timestep:         4600 || Speed:  145.6 MC/s (9.279e-03 s/TS) || Energy: ~3.27e-21 (-35.83dB)
+[@       48s] Timestep:         5024 || Speed:  142.0 MC/s (9.514e-03 s/TS) || Energy: ~1.83e-21 (-38.36dB)
+[@       52s] Timestep:         5464 || Speed:  146.5 MC/s (9.218e-03 s/TS) || Energy: ~9.87e-22 (-41.04dB)
+Time for 5464 iterations with 1350837.00 cells : 52.61 sec
+Speed: 140.31 MCells/s 
+==============================================================================
+Stage 04 v5 (radial lumped + impedance renorm): sim_pkg_0017
+==============================================================================
+GeometryDescription  sim_id=sim_pkg_0017  source=sim_folder
+  via_radius   = 3.295 um
+  antipad_rad  = 20.534 um
+  pitch        = 57.933 um
+  TDIEL/TMET   = 18.250 / 2.172 um
+  eps_r        = 2.9235
+  sigma        = 5.137e+07 S/m
+  tan(delta)   = 0.01341
+  layers(metal)= 48  (stackup entries: 95)
+  grid         = 3 x 5
+  S/G/P vias   = 8/6/1  (total placed: 15)
+  n_ports      = 16  (4 diff pairs)
+  total_thick  = 533.13 um
+
+  ArrayModelBuilder v5 (radial lumped + Z-renorm) for sim_pkg_0017
+    domain (mil): x[-115.9,231.7] y[-115.9,347.6] z[-60.0,593.1]
+    infinite planes: dielectric + G/P fill x/y into lateral PML
+    port impedance : 64.2 ohm (computed coaxial Z of via-antipad; renormalized to 50 on output)
+    mesh res       : 4.602 mil (15 cells/lambda @ 100 GHz)
+    boundaries     : PML_8 all six faces
+    n_ports        : 16
+
+Full 16-port solve. Ports at 64.2 ohm -> renormalized to 50 ohm (no DC scalar).
+
+    [excite port 1/16]
+    [excite port 2/16]
+    [excite port 3/16]
+    [excite port 4/16]
+    [excite port 5/16]
+    [excite port 6/16]
+    [excite port 7/16]
+    [excite port 8/16]
+    [excite port 9/16]
+    [excite port 10/16]
+    [excite port 11/16]
+    [excite port 12/16]
+    [excite port 13/16]
+    [excite port 14/16]
+    [excite port 15/16]
+    [excite port 16/16]
+
+Saved (50-ohm referenced, no scalar): /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/results/04_openems/sim_pkg_0017_coax_openems_se.npz
+Run your existing stage 05 unchanged.

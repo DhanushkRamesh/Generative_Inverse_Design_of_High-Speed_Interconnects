@@ -1,0 +1,26 @@
+==============================================================================
+Stage 04 v4 (CoaxialPort): build array model  (sim_pkg_0017)
+==============================================================================
+GeometryDescription  sim_id=sim_pkg_0017  source=sim_folder
+  via_radius   = 3.295 um
+  antipad_rad  = 20.534 um
+  pitch        = 57.933 um
+  TDIEL/TMET   = 18.250 / 2.172 um
+  eps_r        = 2.9235
+  sigma        = 5.137e+07 S/m
+  tan(delta)   = 0.01341
+  layers(metal)= 48  (stackup entries: 95)
+  grid         = 3 x 5
+  S/G/P vias   = 8/6/1  (total placed: 15)
+  n_ports      = 16  (4 diff pairs)
+  total_thick  = 533.13 um
+
+  ArrayModelBuilder v4 (CoaxialPort) for sim_pkg_0017
+    board (mil) : x[-57.9,173.8] y[-57.9,289.7] z[0,533.1]
+    domain (mil): z[-100.0,633.1] (coax stubs of 100 mil above/below)
+    coax launch : r_i=3.295 r_o=20.534 (air, Z0 ~ 110 ohm; renormalized to 50 ohm on output)
+    mesh res    : 4.602 mil (15 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z PML_8
+    n_ports     : 16
+
+Pass --dry-run or --run.
