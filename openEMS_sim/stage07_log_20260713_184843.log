@@ -1,0 +1,21 @@
+==============================================================================
+Stage 07: design_sample_0  (template sim_pkg_0017, pair 1, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_0] ---
+    via_radius   = 2.403 mil
+    antipad_rad  = 23.173 mil
+    pitch        = 66.312 mil
+    TDIEL/TMET   = 1296.2 total, eps_r=3.383, tan_d=0.1039
+    n_ports      = 16
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+  building + simulating in OpenEMS (16 ports) ...
+  ArrayModelBuilder v4 (CoaxialPort) for generated_from_sim_pkg_0017
+    board (mil) : x[-66.3,198.9] y[-66.3,331.6] z[0,1296.2]
+    domain (mil): z[-100.0,1396.2] (coax stubs of 100 mil above/below)
+    coax launch : r_i=2.403 r_o=23.173 (air, Z0 ~ 136 ohm; renormalized to 50 ohm on output)
+    mesh res    : 3.208 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z PML_8
+    n_ports     : 16
+    [excite port 1/16]

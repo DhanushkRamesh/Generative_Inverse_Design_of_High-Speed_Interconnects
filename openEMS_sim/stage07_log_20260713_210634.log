@@ -1,0 +1,35 @@
+==============================================================================
+Stage 07: design_sample_42  (template sim_pkg_0033, pair 1, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_42] ---
+    via_radius   = 7.684 mil
+    antipad_rad  = 18.645 mil
+    pitch        = 56.946 mil
+    TDIEL/TMET   = 626.0 total, eps_r=3.916, tan_d=0.0295
+    n_ports      = 40
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+  building + simulating in OpenEMS (40 ports) ...
+  ArrayModelBuilder v4 (CoaxialPort) for generated_from_sim_pkg_0033
+    board (mil) : x[-56.9,398.6] y[-56.9,284.7] z[0,626.0]
+    domain (mil): z[-100.0,726.0] (coax stubs of 100 mil above/below)
+    coax launch : r_i=7.684 r_o=18.645 (air, Z0 ~ 53 ohm; renormalized to 50 ohm on output)
+    mesh res    : 2.982 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z PML_8
+    n_ports     : 40
+    [excite port 1/40]
+Traceback (most recent call last):
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/validate_model_generated.py", line 277, in <module>
+    main()
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/validate_model_generated.py", line 227, in main
+    freq, S_oe = builder.run_and_extract(sim_root, run=True)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/build_array_model_mur_final.py", line 410, in run_and_extract
+    ports[m].CalcPort(str(sim_dir), freq)
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/.venv/lib/python3.12/site-packages/openEMS/ports.py", line 151, in CalcPort
+    self.ReadUIData(sim_path, freq, signal_type)
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/.venv/lib/python3.12/site-packages/openEMS/ports.py", line 881, in ReadUIData
+    self.it_tot = 0.5 * (self.i_data.ui_val[0]   + self.i_data.ui_val[1])
+                         ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+ValueError: operands could not be broadcast together with shapes (564,) (565,) 

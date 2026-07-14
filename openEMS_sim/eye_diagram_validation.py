@@ -295,11 +295,11 @@ def main():
             a.set_ylim(-ymax, ymax)
         fig.suptitle(f"112G PAM4 eye: {args.label} vs {args.compare_label}  "
                      f"(total-opening diff {pct:.1f}%)")
-        out = OUT_DIR / f"eye_{args.label}_vs_{args.compare_label}.png"
+        out = OUT_DIR / f"best_eye_{args.label}_vs_{args.compare_label}.png"
     else:
         fig, ax = plt.subplots(figsize=(7, 5), tight_layout=True)
         plot_eye(ax, t_eye, segs, f"{args.label} (112G PAM4)")
-        out = OUT_DIR / f"eye_{args.label}.png"
+        out = OUT_DIR / f"best_eye_{args.label}.png"
 
     fig.savefig(out, dpi=150)
     plt.close(fig)

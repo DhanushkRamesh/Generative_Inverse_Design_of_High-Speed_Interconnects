@@ -1,0 +1,52 @@
+==============================================================================
+Stage 05: baseline comparison (sim_pkg_0017, pair 3)
+==============================================================================
+
+--- PANEL A: pipeline audit (extracted-from-raw vs processed) ---
+  max |diff| = 3.917e-08  MATCH (pipeline verified)
+
+--- PANEL B: purest solver delta (OpenEMS 16-port vs raw) ---
+    SE_S11  0-14    mean=  1.86 max=  6.93 dB
+    SE_S11  14-28   mean=  2.17 max=  5.22 dB
+    SE_S11  28-56   mean=  3.61 max=  8.02 dB
+    SE_S11  56-100  mean=  2.98 max=  6.49 dB
+    SE_S21  0-14    mean=  1.03 max=  1.18 dB
+    SE_S21  14-28   mean=  1.17 max=  1.50 dB
+    SE_S21  28-56   mean=  2.55 max=  7.57 dB
+    SE_S21  56-100  mean=  6.06 max= 17.35 dB
+
+--- PANEL C: delta_solver (OpenEMS mixed-mode pair vs processed) ---
+  [EYE-CRITICAL view: raw dB | floored dB (-30 clip) | linear |dS|]
+    Sdd11   0-14    raw=  4.30 floored=  4.30 dB  lin= 0.1019 <- eye
+    Sdd11   14-28   raw=  4.17 floored=  4.17 dB  lin= 0.1049 <- eye
+    Sdd11   28-56   raw=  8.86 floored=  8.86 dB  lin= 0.1622
+    Sdd11   56-100  raw=  1.36 floored=  1.36 dB  lin= 0.0297
+    Sdd21   0-14    raw=  1.03 floored=  1.03 dB  lin= 0.0960 <- eye
+    Sdd21   14-28   raw=  1.14 floored=  1.14 dB  lin= 0.0615 <- eye
+    Sdd21   28-56   raw=  1.01 floored=  1.00 dB  lin= 0.0152
+    Sdd21   56-100  raw= 13.86 floored=  6.46 dB  lin= 0.0559
+    Scc11   0-14    raw=  1.60 floored=  1.60 dB  lin= 0.0670
+    Scc11   14-28   raw=  4.76 floored=  4.76 dB  lin= 0.1468
+    Scc11   28-56   raw=  4.21 floored=  4.21 dB  lin= 0.1001
+    Scc11   56-100  raw=  2.66 floored=  2.66 dB  lin= 0.0458
+    Scd21   0-14    raw=  3.95 floored=  2.85 dB  lin= 0.0315
+    Scd21   14-28   raw=  7.82 floored=  6.93 dB  lin= 0.0615
+    Scd21   28-56   raw=  5.44 floored=  1.68 dB  lin= 0.0174
+    Scd21   56-100  raw= 11.95 floored=  5.83 dB  lin= 0.0464
+
+  saved sim_pkg_0017_pair3_panelC.csv
+  overlay: /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/results/05_baseline/sim_pkg_0017_mur_lateral_pair3_overlay.png
+
+==============================================================================
+STAGE 05 GATE
+==============================================================================
+  Panel A pipeline audit: pass
+  EYE-CRITICAL delta_solver (0-28 GHz, floored at -30 dB): worst mean = 4.30 dB (Sdd11 0-14) [target <= ~3 dB]
+  (raw-dB worst for reference: 4.30 dB -- difference vs floored = aligned-null depth mismatch, negligible energy)
+  [FAIL] eye-critical band exceeds 3 dB -- the eye would be affected. Fix ports/mesh/floor before trusting the eye.
+
+  GATE NOT PASSED -- debug before scaling.
+  (High-frequency stopband disagreement is expected and does not
+   fail the gate; it barely affects the eye. The model-weighted
+   view above shows agreement where the model is sensitive.)
+==============================================================================
