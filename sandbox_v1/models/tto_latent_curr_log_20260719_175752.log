@@ -1,0 +1,88 @@
+
+====================================================================
+  SAMPLE 441   mode=latent  curriculum=True
+====================================================================
+Loading data from diff_pair_dataset.pt ...
+Loading element-aware weight tensor ...
+Loading frozen forward surrogate + cVAE ...
+
+=== TTO [latent_curr] sample 441: 150 steps, lr=0.05, restarts=8 ===
+  restart 00 | final full-band loss 0.00927 | max|x_norm| 1.15
+  restart 01 | final full-band loss 0.00927 | max|x_norm| 1.15
+  restart 02 | final full-band loss 0.00927 | max|x_norm| 1.14
+  restart 03 | final full-band loss 0.00923 | max|x_norm| 1.12
+  restart 04 | final full-band loss 0.00927 | max|x_norm| 1.14
+  restart 05 | final full-band loss 0.00926 | max|x_norm| 1.14
+  restart 06 | final full-band loss 0.00930 | max|x_norm| 1.11
+  restart 07 | final full-band loss 0.00923 | max|x_norm| 1.15
+  -> best restart 7 (loss 0.00923)
+  decoded max |x_norm| = 1.15 (training data is z-scored: >3 means out-of-distribution)
+[stage-07 export] /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/evaluation_results/generated_designs/design_sample_441_latent_curr.npz
+    template sim_pkg_0356  pair 2
+plot: tto_latent_curr_sample_441.png
+
+====================================================================
+  SAMPLE 1260   mode=latent  curriculum=True
+====================================================================
+Loading data from diff_pair_dataset.pt ...
+Loading element-aware weight tensor ...
+Loading frozen forward surrogate + cVAE ...
+
+=== TTO [latent_curr] sample 1260: 150 steps, lr=0.05, restarts=8 ===
+  restart 00 | final full-band loss 0.01103 | max|x_norm| 1.28
+  restart 01 | final full-band loss 0.01104 | max|x_norm| 1.27
+  restart 02 | final full-band loss 0.01103 | max|x_norm| 1.27
+  restart 03 | final full-band loss 0.01103 | max|x_norm| 1.28
+  restart 04 | final full-band loss 0.01103 | max|x_norm| 1.28
+  restart 05 | final full-band loss 0.01104 | max|x_norm| 1.27
+  restart 06 | final full-band loss 0.01104 | max|x_norm| 1.27
+  restart 07 | final full-band loss 0.01104 | max|x_norm| 1.28
+  -> best restart 3 (loss 0.01103)
+  decoded max |x_norm| = 1.28 (training data is z-scored: >3 means out-of-distribution)
+[stage-07 export] /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/evaluation_results/generated_designs/design_sample_1260_latent_curr.npz
+    template sim_pkg_1027  pair 1
+plot: tto_latent_curr_sample_1260.png
+
+====================================================================
+  SAMPLE 1397   mode=latent  curriculum=True
+====================================================================
+Loading data from diff_pair_dataset.pt ...
+Loading element-aware weight tensor ...
+Loading frozen forward surrogate + cVAE ...
+
+=== TTO [latent_curr] sample 1397: 150 steps, lr=0.05, restarts=8 ===
+  restart 00 | final full-band loss 0.01153 | max|x_norm| 1.88
+  restart 01 | final full-band loss 0.01150 | max|x_norm| 1.88
+  restart 02 | final full-band loss 0.01155 | max|x_norm| 1.88
+  restart 03 | final full-band loss 0.01149 | max|x_norm| 1.88
+  restart 04 | final full-band loss 0.01155 | max|x_norm| 1.88
+  restart 05 | final full-band loss 0.01155 | max|x_norm| 1.87
+  restart 06 | final full-band loss 0.01158 | max|x_norm| 1.87
+  restart 07 | final full-band loss 0.01154 | max|x_norm| 1.87
+  -> best restart 3 (loss 0.01149)
+  decoded max |x_norm| = 1.88 (training data is z-scored: >3 means out-of-distribution)
+[stage-07 export] /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/evaluation_results/generated_designs/design_sample_1397_latent_curr.npz
+    template sim_pkg_1132  pair 2
+plot: tto_latent_curr_sample_1397.png
+
+====================================================================
+  SAMPLE 1716   mode=latent  curriculum=True
+====================================================================
+Loading data from diff_pair_dataset.pt ...
+Loading element-aware weight tensor ...
+Loading frozen forward surrogate + cVAE ...
+
+=== TTO [latent_curr] sample 1716: 150 steps, lr=0.05, restarts=8 ===
+  restart 00 | final full-band loss 0.00679 | max|x_norm| 1.04
+  restart 01 | final full-band loss 0.00679 | max|x_norm| 1.03
+  restart 02 | final full-band loss 0.00679 | max|x_norm| 1.04
+  restart 03 | final full-band loss 0.00680 | max|x_norm| 1.04
+  restart 04 | final full-band loss 0.00676 | max|x_norm| 1.04
+  restart 05 | final full-band loss 0.00678 | max|x_norm| 1.04
+  restart 06 | final full-band loss 0.00679 | max|x_norm| 1.04
+  restart 07 | final full-band loss 0.00679 | max|x_norm| 1.04
+  -> best restart 4 (loss 0.00676)
+  decoded max |x_norm| = 1.04 (training data is z-scored: >3 means out-of-distribution)
+[stage-07 export] /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/evaluation_results/generated_designs/design_sample_1716_latent_curr.npz
+    template sim_pkg_1458  pair 3
+plot: tto_latent_curr_sample_1716.png

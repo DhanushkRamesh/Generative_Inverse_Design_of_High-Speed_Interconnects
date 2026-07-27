@@ -1,0 +1,63 @@
+==============================================================================
+Stage 07: design_sample_0_latent  (template sim_pkg_0017, pair 1, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_0_latent] ---
+    via_radius   = 2.772 mil
+    antipad_rad  = 18.416 mil
+    pitch        = 53.026 mil
+    TDIEL/TMET   = 503.1 total, eps_r=3.207, tan_d=0.0176
+    n_ports      = 16
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+  building + simulating in OpenEMS (16 ports) ...
+  ArrayModelBuilder v4 (CoaxialPort) for generated_from_sim_pkg_0017
+    board (mil) : x[-53.0,159.1] y[-53.0,265.1] z[0,503.1]
+    domain (mil): z[-100.0,603.1] (coax stubs of 100 mil above/below)
+    coax launch : r_i=2.772 r_o=18.416 (air, Z0 ~ 114 ohm; renormalized to 50 ohm on output)
+    mesh res    : 3.295 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z PML_8
+    n_ports     : 16
+    [excite port 1/16]
+    [excite port 2/16]
+    [excite port 3/16]
+    [excite port 4/16]
+    [excite port 5/16]
+    [excite port 6/16]
+    [excite port 7/16]
+    [excite port 8/16]
+    [excite port 9/16]
+    [excite port 10/16]
+    [excite port 11/16]
+    [excite port 12/16]
+    [excite port 13/16]
+    [excite port 14/16]
+    [excite port 15/16]
+    [excite port 16/16]
+    [renorm] analytic coax Z = 63.4 ohm -> 50 ohm
+  saved design_sample_0_latent_openems_se.npz
+
+==============================================================================
+STAGE 07 RESULT  (mean floored dB, eye band)
+==============================================================================
+  [openems_vs_target]
+    Sdd11  0-14    floored=  2.20 dB  lin=0.0486
+    Sdd11  14-28   floored=  3.35 dB  lin=0.0787
+    Sdd21  0-14    floored=  1.25 dB  lin=0.1203
+    Sdd21  14-28   floored=  0.95 dB  lin=0.0698
+  [openems_vs_pred]
+    Sdd11  0-14    floored=  2.27 dB  lin=0.0437
+    Sdd11  14-28   floored=  2.81 dB  lin=0.0612
+    Sdd21  0-14    floored=  1.48 dB  lin=0.1445
+    Sdd21  14-28   floored=  1.26 dB  lin=0.0964
+
+  figure: design_sample_0_latent_overlay_20260714_023138.png
+  table : design_sample_0_latent_validation_20260714_023138.csv
+
+INTERPRETATION:
+  openems_vs_target small  -> the design achieves its goal in real
+     physics: the inverse model works. THE thesis result.
+  openems_vs_pred within the stage-06 solver floor -> the forward
+     surrogate was honest about this design.
+  openems_vs_pred >> floor (esp. where TTO optimised) -> surrogate
+     exploitation, caught in independent physics. Motivates latent TTO.

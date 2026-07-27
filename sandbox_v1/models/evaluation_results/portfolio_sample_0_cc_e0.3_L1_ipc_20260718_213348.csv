@@ -1,0 +1,3 @@
+rank,restart,fit_eye_dB,yield_pct,yield_lo,yield_hi,sensitivity,fit_full_loss,max_abs_xnorm,npz
+1,10,1.275,88.1,86.61,89.45,0.004355,0.014533,2.094,design_sample_0_cc_e0.3_L1_ipc_r10.npz
+2,1,1.277,84.3,82.64,85.83,0.004116,0.015469,2.622,design_sample_0_cc_e0.3_L1_ipc_r01.npz

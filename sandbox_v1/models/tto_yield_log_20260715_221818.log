@@ -1,0 +1,46 @@
+
+====================================================================
+  SAMPLE 0  lambda_j=0.1  curriculum=False
+====================================================================
+
+  TOLERANCE MODEL (1-sigma perturbations, normalized units = 0.10 x population std):
+          VIA_RADIUS : sigma_norm=0.10 -> sigma_phys=0.4662 physical units
+      ANTIPAD_RADIUS : sigma_norm=0.10 -> sigma_phys=0.555 physical units
+               PITCH : sigma_norm=0.10 -> sigma_phys=0.8545 physical units
+               TDIEL : sigma_norm=0.10 -> sigma_phys=2.195 physical units
+                TMET : sigma_norm=0.10 -> sigma_phys=0.09792 physical units
+        PERMITTIVITY : sigma_norm=0.10 -> sigma_phys=0.06415 physical units
+        CONDUCTIVITY : sigma_norm=0.10 -> sigma_phys=0.004687 decades (log10 feature -> relative)
+         LOSSTANGENT : sigma_norm=0.10 -> sigma_phys=0.04055 decades (log10 feature -> relative)
+  (edit --tol-frac globally now; per-feature IPC-based sigmas are a one-dict change for the thesis)
+
+=== YIELD TTO [yield_L0.1] sample 0: 12 restarts x 150 steps, lambda_j=0.1 ===
+  restart 00 | eye-fit  0.67 dB | sens  0.05497 | yield  43.4% [41.2,45.6] | max|x| 1.54
+  restart 01 | eye-fit  0.67 dB | sens  0.05448 | yield  42.9% [40.7,45.1] | max|x| 1.53
+  restart 02 | eye-fit  0.67 dB | sens  0.05494 | yield  42.5% [40.3,44.7] | max|x| 1.54
+  restart 03 | eye-fit  0.68 dB | sens  0.05502 | yield  42.9% [40.7,45.1] | max|x| 1.54
+  restart 04 | eye-fit  0.68 dB | sens  0.05497 | yield  43.5% [41.4,45.7] | max|x| 1.54
+  restart 05 | eye-fit  2.78 dB | sens  0.02238 | yield   0.0% [0.0,0.2] | max|x| 1.39
+  restart 06 | eye-fit  2.78 dB | sens  0.02240 | yield   0.0% [0.0,0.2] | max|x| 1.39
+  restart 07 | eye-fit  0.68 dB | sens  0.05492 | yield  43.8% [41.6,45.9] | max|x| 1.54
+  restart 08 | eye-fit  0.67 dB | sens  0.05493 | yield  45.1% [43.0,47.3] | max|x| 1.54
+  restart 09 | eye-fit  2.78 dB | sens  0.02238 | yield   0.0% [0.0,0.2] | max|x| 1.39
+  restart 10 | eye-fit  2.78 dB | sens  0.02236 | yield   0.0% [0.0,0.2] | max|x| 1.39
+  restart 11 | eye-fit  2.78 dB | sens  0.02238 | yield   0.0% [0.0,0.2] | max|x| 1.39
+
+  fit gate (3.0 dB eye-band): 12/12 candidates pass
+  portfolio diversity: pairwise |dx| mean 0.680, max 1.274 (normalized units; ~0 would mean all restarts found the same design)
+
+======================================================================
+  RANKED PORTFOLIO (top 5)  sample 0  [yield_L0.1]
+======================================================================
+  rank eye-fit dB  yield %       sens file
+     1       0.68     45.1    0.05493 design_sample_0_yield_L0.1_r08.npz
+     2       0.68     43.8    0.05492 design_sample_0_yield_L0.1_r07.npz
+     3       0.68     43.5    0.05497 design_sample_0_yield_L0.1_r04.npz
+     4       0.67     43.4    0.05497 design_sample_0_yield_L0.1_r00.npz
+     5       0.67     42.9    0.05448 design_sample_0_yield_L0.1_r01.npz
+
+  csv    : portfolio_sample_0_yield_L0.1_20260715_221943.csv
+  pareto : pareto_sample_0_yield_L0.1_20260715_221943.png
+  top design (for stage 07): design_sample_0_yield_L0.1_top.npz
