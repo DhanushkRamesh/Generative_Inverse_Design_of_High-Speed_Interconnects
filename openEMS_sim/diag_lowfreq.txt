@@ -1,0 +1,31 @@
+OpenEMS raw single-ended, pair-1 ports [0,2,1,3]:
+  f=  0.25 GHz  |S11|=  -5.12  |S21|= -13.50  |S_00_00|raw
+  f=  1.50 GHz  |S11|=  -5.05  |S21|= -13.68  |S_00_00|raw
+  f= 13.97 GHz  |S11|=  -4.75  |S21|= -16.80  |S_00_00|raw
+
+OpenEMS mixed-mode pair 1:
+  f=  0.25 GHz  Sdd11=  -5.85  Sdd21= -12.58
+  f=  1.50 GHz  Sdd11=  -5.87  Sdd21= -12.62
+  f= 13.97 GHz  Sdd11=  -5.49  Sdd21= -13.55
+
+Diagonal reflection at all 16 ports, f=0.25GHz (should be deep if matched):
+   [-5.1 -6.6 -5.4 -6.9 -4.5 -6.  -4.8 -6.5 -3.7 -5.3 -4.4 -6.  -4.6 -6.1
+ -5.1 -6.6]
+
+Max |S| per port at f=0.25GHz (row max, checks where energy goes):
+  excite port  0: strongest coupling to port  0 at  -5.12 dB
+  excite port  1: strongest coupling to port  1 at  -6.56 dB
+  excite port  2: strongest coupling to port  2 at  -5.39 dB
+  excite port  3: strongest coupling to port  3 at  -6.92 dB
+  excite port  4: strongest coupling to port  4 at  -4.47 dB
+  excite port  5: strongest coupling to port  5 at  -5.99 dB
+  excite port  6: strongest coupling to port  6 at  -4.84 dB
+  excite port  7: strongest coupling to port  7 at  -6.49 dB
+  excite port  8: strongest coupling to port  8 at  -3.75 dB
+  excite port  9: strongest coupling to port  9 at  -5.34 dB
+  excite port 10: strongest coupling to port 10 at  -4.41 dB
+  excite port 11: strongest coupling to port 11 at  -5.97 dB
+  excite port 12: strongest coupling to port 12 at  -4.58 dB
+  excite port 13: strongest coupling to port 13 at  -6.11 dB
+  excite port 14: strongest coupling to port 14 at  -5.09 dB
+  excite port 15: strongest coupling to port 15 at  -6.55 dB

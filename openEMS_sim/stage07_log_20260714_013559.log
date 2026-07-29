@@ -1,0 +1,13 @@
+==============================================================================
+Stage 07: design_sample_100_latent  (template sim_pkg_0059, pair 4, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_100_latent] ---
+    via_radius   = 3.503 mil
+    antipad_rad  = 16.174 mil
+    pitch        = 50.489 mil
+    TDIEL/TMET   = 261.7 total, eps_r=3.134, tan_d=0.0168
+    n_ports      = 20
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+[--check-only] stopping before simulation. If the geometry looks good, re-run without --check-only.

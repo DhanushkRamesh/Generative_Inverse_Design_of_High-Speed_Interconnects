@@ -1,0 +1,59 @@
+==============================================================================
+Stage 05: baseline comparison (sim_pkg_0017, pair 1)
+==============================================================================
+
+--- PANEL A: pipeline audit (extracted-from-raw vs processed) ---
+  max |diff| = 3.574e-08  MATCH (pipeline verified)
+
+--- PANEL B: purest solver delta (OpenEMS 16-port vs raw) ---
+    SE_S11  0-14    mean=  2.92 max= 10.60 dB
+    SE_S11  14-28   mean=  1.68 max=  4.92 dB
+    SE_S11  28-56   mean=  6.80 max= 13.69 dB
+    SE_S11  56-100  mean=  7.28 max= 13.47 dB
+    SE_S21  0-14    mean=  3.71 max=  4.42 dB
+    SE_S21  14-28   mean=  5.19 max=  6.57 dB
+    SE_S21  28-56   mean=  4.49 max=  8.47 dB
+    SE_S21  56-100  mean=  9.20 max= 18.30 dB
+
+--- PANEL C: delta_solver (OpenEMS mixed-mode pair vs processed) ---
+  [EYE-CRITICAL view: per-band flat mean |dB|]
+    Sdd11   0-14    mean=  4.60 max= 21.30 dB <- eye
+    Sdd11   14-28   mean=  4.89 max= 11.66 dB <- eye
+    Sdd11   28-56   mean=  5.29 max= 10.47 dB
+    Sdd11   56-100  mean=  5.99 max= 19.72 dB
+    Sdd21   0-14    mean=  3.53 max=  4.43 dB <- eye
+    Sdd21   14-28   mean=  4.49 max=  5.63 dB <- eye
+    Sdd21   28-56   mean=  7.46 max= 25.74 dB
+    Sdd21   56-100  mean=  7.61 max= 14.27 dB
+    Scc11   0-14    mean=  2.25 max=  9.69 dB
+    Scc11   14-28   mean=  3.37 max=  6.97 dB
+    Scc11   28-56   mean=  8.27 max= 18.00 dB
+    Scc11   56-100  mean=  8.55 max= 17.37 dB
+    Scd21   0-14    mean=  5.16 max=  8.18 dB
+    Scd21   14-28   mean= 18.05 max= 24.96 dB
+    Scd21   28-56   mean=  5.93 max= 14.39 dB
+    Scd21   56-100  mean= 10.70 max= 32.89 dB
+
+  [MODEL-WEIGHTED view: delta_solver weighted by the element-
+   aware frequency-importance tensor -- agreement WHERE THE
+   MODEL IS SENSITIVE (Sdd11 low-f, Sdd21 high-f)]
+    Sdd11   weighted mean |dB| =   4.89
+    Sdd21   weighted mean |dB| =   7.04
+    Scc11   weighted mean |dB| =   5.90
+    Scd21   weighted mean |dB| =  10.13
+
+  saved sim_pkg_0017_pair1_panelC.csv
+  overlay: /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/results/05_baseline/sim_pkg_0017_pair1_overlay_final.png
+
+==============================================================================
+STAGE 05 GATE
+==============================================================================
+  Panel A pipeline audit: pass
+  EYE-CRITICAL delta_solver (0-28 GHz): worst mean = 4.89 dB (Sdd11 14-28) [target <= ~3 dB]
+  [FAIL] eye-critical band exceeds 3 dB -- the eye would be affected. Fix ports/mesh/floor before trusting the eye.
+
+  GATE NOT PASSED -- debug before scaling.
+  (High-frequency stopband disagreement is expected and does not
+   fail the gate; it barely affects the eye. The model-weighted
+   view above shows agreement where the model is sensitive.)
+==============================================================================

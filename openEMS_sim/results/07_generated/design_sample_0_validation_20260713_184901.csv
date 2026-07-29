@@ -1,0 +1,17 @@
+case,comparison,trace,band,mean_dB,mean_dB_floored,mean_linear
+design_sample_0,openems_vs_target,Sdd11,0-14,3.92,3.902,0.1
+design_sample_0,openems_vs_target,Sdd11,14-28,5.136,5.136,0.1164
+design_sample_0,openems_vs_target,Sdd11,28-56,4.383,4.383,0.1101
+design_sample_0,openems_vs_target,Sdd11,56-100,2.854,2.854,0.0635
+design_sample_0,openems_vs_target,Sdd21,0-14,20.967,20.967,0.8119
+design_sample_0,openems_vs_target,Sdd21,14-28,23.597,23.532,0.6231
+design_sample_0,openems_vs_target,Sdd21,28-56,19.219,12.025,0.1712
+design_sample_0,openems_vs_target,Sdd21,56-100,3.717,1.39,0.0126
+design_sample_0,openems_vs_pred,Sdd11,0-14,2.772,2.772,0.0827
+design_sample_0,openems_vs_pred,Sdd11,14-28,6.376,6.376,0.1538
+design_sample_0,openems_vs_pred,Sdd11,28-56,5.99,5.99,0.1781
+design_sample_0,openems_vs_pred,Sdd11,56-100,2.701,2.701,0.0779
+design_sample_0,openems_vs_pred,Sdd21,0-14,19.514,19.514,0.685
+design_sample_0,openems_vs_pred,Sdd21,14-28,15.384,15.319,0.2346
+design_sample_0,openems_vs_pred,Sdd21,28-56,6.217,2.118,0.0218
+design_sample_0,openems_vs_pred,Sdd21,56-100,4.799,0.455,0.0107

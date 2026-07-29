@@ -1,0 +1,15 @@
+{
+  "dataset": "link",
+  "best_epoch": 290,
+  "best_val_loss": 1.9978497173184546,
+  "test_db_mae": 4.034363949740374,
+  "test_phase_mae": 117.54014559145327,
+  "per_element_mae": {
+    "Sdd11 (Return Loss)": 3.645745462841458,
+    "Sdd12": 4.423038032319811,
+    "Sdd21 (Insertion Loss)": 4.421860968625104,
+    "Sdd22 (Return Loss)": 3.6468110261140048
+  },
+  "total_params": 2442888,
+  "architecture": "MLP (no physics constraints)"
+}

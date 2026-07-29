@@ -1,0 +1,24 @@
+======================================================================
+Stage 08: 112G PAM4 eye  (56 GBaud, UI = 17.857 ps, PRBS13Q, un-equalised)
+======================================================================
+
+  [CONMLS] rail centres: [-0.7142, -0.2028, 0.2526, 0.7268]
+  [CONMLS] eye heights (3 eyes): [0.2128, 0.1571, 0.1773]
+
+  [OpenEMS] rail centres: [-0.8445, -0.2512, 0.2643, 0.8456]
+  [OpenEMS] eye heights: [0.294, 0.2193, 0.2845]
+
+  --- EYE AGREEMENT (target vs OpenEMS) ---
+    total eye opening [CONMLS]  : 0.5472
+    total eye opening [OpenEMS]: 0.7978
+    total-opening difference          : 45.8 %
+    per-sub-eye |height diff|         : 0.0812, 0.0622, 0.1072
+    VERDICT: eyes differ by 45.8% -- the solver
+    difference is visible in the eye; report honestly and
+    trace it to the band where Sdd21 disagrees.
+
+  figure: /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/results/08_eye/eye_CONMLS_vs_OpenEMS.png
+
+  An open eye (positive heights on all three sub-eyes) means the
+  channel carries 112G PAM4 without equalisation. Matching target
+  and generated eyes is the thesis finale result.

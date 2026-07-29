@@ -1,0 +1,48 @@
+==============================================================================
+Stage 04 v4 (CoaxialPort): build array model  (sim_pkg_0017)
+==============================================================================
+GeometryDescription  sim_id=sim_pkg_0017  source=sim_folder
+  via_radius   = 3.295 um
+  antipad_rad  = 20.534 um
+  pitch        = 57.933 um
+  TDIEL/TMET   = 18.250 / 2.172 um
+  eps_r        = 2.9235
+  sigma        = 5.137e+07 S/m
+  tan(delta)   = 0.01341
+  layers(metal)= 48  (stackup entries: 95)
+  grid         = 3 x 5
+  S/G/P vias   = 8/6/1  (total placed: 15)
+  n_ports      = 16  (4 diff pairs)
+  total_thick  = 533.13 um
+
+  ArrayModelBuilder v4 (CoaxialPort) for sim_pkg_0017
+    board (mil) : x[-57.9,173.8] y[-57.9,289.7] z[0,533.1]
+    domain (mil): z[-100.0,633.1] (coax stubs of 100 mil above/below)
+    coax launch : r_i=3.295 r_o=20.534 (air, Z0 ~ 110 ohm; renormalized to 50 ohm on output)
+    mesh res    : 4.602 mil (15 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z PML_8
+    n_ports     : 16
+
+Full 16-port solve (est. ~8 min/port with the v4 mesh).
+
+    [excite port 1/16]
+Traceback (most recent call last):
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/build_array_model_coax_final.py", line 462, in <module>
+    main()
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/build_array_model_coax_final.py", line 450, in main
+    freq, S = builder.run_and_extract(sim_root, run=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/build_array_model_coax_final.py", line 386, in run_and_extract
+    ports[m].CalcPort(str(sim_dir), freq,
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/.venv/lib/python3.12/site-packages/openEMS/ports.py", line 151, in CalcPort
+    self.ReadUIData(sim_path, freq, signal_type)
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/.venv/lib/python3.12/site-packages/openEMS/ports.py", line 879, in ReadUIData
+    self.i_data = UI_data(self.I_filenames, sim_path, freq, signal_type)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/.venv/lib/python3.12/site-packages/openEMS/ports.py", line 72, in __init__
+    self.ui_f_val.append(utilities.DFT_time2freq(data[:, 0], data[:, 1], freq, signal_type=signal_type))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/.venv/lib/python3.12/site-packages/openEMS/utilities.py", line 26, in DFT_time2freq
+    f_val[n_f] = np.sum( val*np.exp( -1j*2*np.pi*freq[n_f] * t ) )
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

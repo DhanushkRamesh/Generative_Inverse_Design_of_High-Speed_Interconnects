@@ -1,0 +1,42 @@
+==============================================================================
+Stage 06: sim_pkg_0017
+==============================================================================
+  reusing sim_pkg_0017_mur_lateral_openems_se.npz
+  pair 1: compared
+  pair 2: compared
+  pair 3: compared
+  pair 4: compared
+==============================================================================
+Stage 06: sim_pkg_2871
+==============================================================================
+  reusing sim_pkg_2871_mur_lateral_openems_se.npz
+  pair 1: compared
+  pair 2: compared
+  pair 3: compared
+  pair 4: compared
+  pair 5: compared
+
+==============================================================================
+delta_solver SUMMARY -- EYE-CRITICAL (floored dB, all sims & pairs)
+==============================================================================
+  trace   band      mean-of-means    worst    N
+  Sdd11   0-14               7.37    11.19    9 <- eye
+  Sdd11   14-28             10.48    16.96    9 <- eye
+  Sdd11   28-56              5.49     8.86    9
+  Sdd11   56-100             4.17     7.04    9
+  Sdd21   0-14               0.92     1.03    9 <- eye
+  Sdd21   14-28              1.36     2.03    9 <- eye
+  Sdd21   28-56              2.76     4.42    9
+  Sdd21   56-100             4.40     6.46    9
+
+==============================================================================
+delta_solver SUMMARY -- MODEL-WEIGHTED (element-aware tensor)
+==============================================================================
+  Sdd11   weighted mean-of-means (floored) = 7.78 dB  (N=9)
+  Sdd21   weighted mean-of-means (floored) = 3.24 dB  (N=9)
+
+  tables written to /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/results/06_delta_solver/ with suffix '_first2_20260712_183014'
+
+  This is the solver-consistency floor across all tested sims.
+  Report the eye-critical 0-28 GHz rows (protect the eye) and the
+  model-weighted numbers (agreement where the model is sensitive).
