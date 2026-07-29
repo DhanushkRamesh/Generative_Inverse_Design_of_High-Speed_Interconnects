@@ -1,0 +1,36 @@
+
+====================================================================
+  SAMPLE 1260  lambda_j=0.1  curriculum=False
+====================================================================
+
+  TOLERANCE MODEL [ipc] x scale 1 (1-sigma perturbations; limit=3*sigma Cpk=1 convention for 'ipc'):
+          VIA_RADIUS : abs 0.5 mil (limit/3)      sigma_phys=0.5 mil        sigma_norm=0.1073
+      ANTIPAD_RADIUS : abs 0.67 mil (limit/3)     sigma_phys=0.67 mil        sigma_norm=0.1207
+               PITCH : abs 0.33 mil (limit/3)     sigma_phys=0.33 mil        sigma_norm=0.0386
+               TDIEL : rel +/-3.3% (limit/3)      sigma_phys=0.9074 feat-units sigma_norm=0.0413
+                TMET : rel +/-3.3% (limit/3)      sigma_phys=0.08801 feat-units sigma_norm=0.0899
+        PERMITTIVITY : rel +/-0.67% (limit/3)     sigma_phys=0.02094 feat-units sigma_norm=0.0326
+        CONDUCTIVITY : rel +/-3.3% (limit/3)      sigma_phys=0.01423 decades    sigma_norm=0.3035
+         LOSSTANGENT : rel +/-3.3% (limit/3)      sigma_phys=0.01423 decades    sigma_norm=0.0351
+  (IPC gives ACCEPTANCE LIMITS, not process sigmas; limit/3 is a stated Cpk=1 assumption. CONDUCTIVITY entry is an engineering assumption with no standards anchor. See PartC_Yield_Plan_v3.md.)
+
+=== YIELD TTO [wc_L1_ipc] sample 1260: 12 restarts x 150 steps
+    lambda_cc=1.0  [Wang/Sigmund worst-case corners]
+    spec: eye-band IL >= target-1.0 dB, RL <= -8.0 dB | tol_frac=0.1
+  restart 00 | eye-fit  2.15 dB | sens  0.00326 | yield  78.5% [76.7,80.3] | max|x| 2.66
+  restart 01 | eye-fit  2.67 dB | sens  0.00504 | yield  80.3% [78.5,82.0] | max|x| 2.70
+Traceback (most recent call last):
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/tto_yield_aware_inverse.py", line 939, in <module>
+    main()
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/tto_yield_aware_inverse.py", line 925, in main
+    run_yield_tto(idx, tto_steps=args.steps, lr=args.lr,
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/tto_yield_aware_inverse.py", line 723, in run_yield_tto
+    y, ylo, yhi = mc_yield(fwd, x_c, xg, xc, freqs_hz, sigma, S_tgt,
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/.venv/lib/python3.12/site-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/sandbox_v1/models/tto_yield_aware_inverse.py", line 427, in mc_yield
+    ok21 = (s21[:, eye_mask] >= (tgt21[eye_mask].view(1, -1) - spec_il_margin)).all(dim=1)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

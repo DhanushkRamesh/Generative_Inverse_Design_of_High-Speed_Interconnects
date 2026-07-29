@@ -1,0 +1,21 @@
+==============================================================================
+Stage 07: design_sample_5490_wc_L1_ipc_top  (template sim_pkg_4511, pair 6, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_5490_wc_L1_ipc_top] ---
+    via_radius   = 6.016 mil
+    antipad_rad  = 23.690 mil
+    pitch        = 57.585 mil
+    TDIEL/TMET   = 184.1 total, eps_r=3.697, tan_d=0.0213
+    n_ports      = 32
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+  building + simulating in OpenEMS (32 ports) ...
+  ArrayModelBuilder v4 (CoaxialPort) for generated_from_sim_pkg_4511
+    board (mil) : x[-57.6,287.9] y[-57.6,345.5] z[0,184.1]
+    domain (mil): z[-100.0,284.1] (coax stubs of 100 mil above/below)
+    coax launch : r_i=6.016 r_o=23.690 (air, Z0 ~ 82 ohm; renormalized to 50 ohm on output)
+    mesh res    : 3.069 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z PML_8
+    n_ports     : 32
+    [excite port 1/32]

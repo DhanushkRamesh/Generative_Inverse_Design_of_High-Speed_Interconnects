@@ -1,0 +1,15 @@
+==============================================================================
+Stage 07: design_sample_1260_cc_e0.05_L0.3_ipc_top  (template sim_pkg_1027, pair 1, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_1260_cc_e0.05_L0.3_ipc_top] ---
+    via_radius   = 20.312 mil
+    antipad_rad  = 35.574 mil
+    pitch        = 61.588 mil
+    TDIEL/TMET   = 270.7 total, eps_r=1.377, tan_d=0.0011
+    n_ports      = 12
+    [WARNING] unphysical geometry:
+      - pitch (61.59) <= 2*antipad (71.15) -- vias/antipads overlap
+    Simulating this may fail or give garbage. Review the design.
+
+[--check-only] stopping before simulation. If the geometry looks good, re-run without --check-only.

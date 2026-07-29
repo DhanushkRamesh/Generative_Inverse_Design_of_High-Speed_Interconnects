@@ -1,0 +1,17 @@
+case,comparison,trace,band,mean_dB,mean_dB_floored,mean_linear
+design_sample_0_yield_L0_top,openems_vs_target,Sdd11,0-14,4.047,4.029,0.1036
+design_sample_0_yield_L0_top,openems_vs_target,Sdd11,14-28,3.858,3.858,0.0983
+design_sample_0_yield_L0_top,openems_vs_target,Sdd11,28-56,7.972,7.972,0.166
+design_sample_0_yield_L0_top,openems_vs_target,Sdd11,56-100,3.17,3.17,0.0634
+design_sample_0_yield_L0_top,openems_vs_target,Sdd21,0-14,2.355,2.355,0.214
+design_sample_0_yield_L0_top,openems_vs_target,Sdd21,14-28,1.402,1.402,0.1022
+design_sample_0_yield_L0_top,openems_vs_target,Sdd21,28-56,4.375,2.528,0.028
+design_sample_0_yield_L0_top,openems_vs_target,Sdd21,56-100,5.78,3.785,0.0313
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd11,0-14,4.001,3.836,0.0918
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd11,14-28,3.323,3.323,0.0804
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd11,28-56,7.942,7.942,0.163
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd11,56-100,3.333,3.333,0.0636
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd21,0-14,2.591,2.591,0.2385
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd21,14-28,1.72,1.72,0.1293
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd21,28-56,3.9,2.064,0.0256
+design_sample_0_yield_L0_top,openems_vs_pred,Sdd21,56-100,7.879,4.143,0.0362

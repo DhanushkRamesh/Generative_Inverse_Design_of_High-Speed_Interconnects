@@ -1,0 +1,12 @@
+==============================================================================
+Stage 07: design_sample_0_yield_L0_top  (template sim_pkg_0017, pair 1, geometry='x_local_norm')
+==============================================================================
+Traceback (most recent call last):
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/validate_model_generated.py", line 277, in <module>
+    main()
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/validate_model_generated.py", line 203, in main
+    norm = load_norm_stats()
+           ^^^^^^^^^^^^^^^^^
+  File "/home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/validate_model_generated.py", line 99, in load_norm_stats
+    import torch
+ModuleNotFoundError: No module named 'torch'
