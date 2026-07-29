@@ -1,0 +1,13 @@
+==============================================================================
+Stage 07: design_sample_9678_wc_L0.5_ipc_top  (template sim_pkg_7975, pair 9, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_9678_wc_L0.5_ipc_top] ---
+    via_radius   = 10.730 mil
+    antipad_rad  = 18.703 mil
+    pitch        = 49.951 mil
+    TDIEL/TMET   = 789.6 total, eps_r=3.541, tan_d=0.0052
+    n_ports      = 40
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+[--check-only] stopping before simulation. If the geometry looks good, re-run without --check-only.

@@ -227,6 +227,40 @@ def boundary_loss(x_norm, margin=2.5):
     return F.relu(x_norm.abs() - margin).pow(2).sum()
 
 
+def manufacturability_penalty(x_norm, feat_idx, feat_mean, feat_std,
+                              clearance=1.0):
+    """Punish geometrically UNBUILDABLE designs during the search.
+
+    The manifold prior (boundary_loss) keeps designs statistically normal, but
+    it does NOT encode the hard geometric rule that antipads must not overlap:
+
+        2 * ANTIPAD_RADIUS  <  PITCH        (with a small clearance margin)
+
+    On some targets (observed on sample 1260) the yield search inflates the
+    antipad to reduce reflections until 2*antipad creeps a few percent past the
+    pitch -- every restart then fails the stage-07 geometry check even though
+    yield and max|x| look fine. This term closes that gap by penalizing the
+    overlap DURING optimization, so the search never proposes an unbuildable
+    design in the first place.
+
+    Everything is done in NORMALIZED feature space (what the optimizer sees);
+    features are de-normalized to physical units (mil) only to evaluate the
+    geometric inequality, then the violation is fed back as a differentiable
+    penalty. `clearance` (mil) is a safety gap so designs sit strictly inside
+    the limit, not exactly on it.
+
+    feat_idx : dict with integer column indices for ANTIPAD_RADIUS and PITCH
+    feat_mean/feat_std : per-feature z-score stats (tensors, feature units=mil)
+    """
+    ia, ip = feat_idx["ANTIPAD_RADIUS"], feat_idx["PITCH"]
+    # de-normalize just the two features we need, staying in the autograd graph
+    antipad = x_norm[0, ia] * feat_std[ia] + feat_mean[ia]
+    pitch = x_norm[0, ip] * feat_std[ip] + feat_mean[ip]
+    # violation (mil): how far 2*antipad + clearance exceeds pitch; 0 if safe
+    viol = F.relu(2.0 * antipad + clearance - pitch)
+    return viol.pow(2)
+
+
 def curriculum_mask(freqs_hz, step, total_steps, device):
     frac = step / max(total_steps - 1, 1)
     f_hi = 28e9 if frac < 1 / 3 else (56e9 if frac < 2 / 3 else float("inf"))
@@ -544,6 +578,7 @@ def run_yield_tto(sample_idx, tto_steps=150, lr=0.05, restarts=12,
                   spec_il_margin=1.0, spec_rl_max=-8.0, fit_gate=3.0,
                   mode="chance", lambda_cc=1.0, eps=0.05, n_cc=64,
                   tol_model="ipc", tol_scale=1.0,
+                  lambda_mfg=10.0, mfg_clearance=1.0,
                   seed=0):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(seed)
@@ -565,6 +600,23 @@ def run_yield_tto(sample_idx, tto_steps=150, lr=0.05, restarts=12,
     # ---- tolerance model: per-feature sigma via the selected model ----------
     d_local = xl_true.shape[1]
     sigma = build_sigma(payload, xl_true, tol_model, tol_frac, tol_scale, device)
+
+    # ---- geometry stats for the manufacturability penalty -------------------
+    # (indices + z-score stats so the penalty can de-normalize antipad & pitch
+    #  to physical mil and enforce 2*antipad < pitch during the search)
+    _local_names = list(payload.get("local_features",
+                                    [f"x{i}" for i in range(d_local)]))
+    feat_idx = {nm: i for i, nm in enumerate(_local_names)}
+    _Xmean = payload["X_local_mean"]
+    _Xstd = payload["X_local_std"]
+    feat_mean = (_Xmean if torch.is_tensor(_Xmean)
+                 else torch.tensor(_Xmean)).float().to(device)
+    feat_std = (_Xstd if torch.is_tensor(_Xstd)
+                else torch.tensor(_Xstd)).float().to(device)
+    can_mfg = ("ANTIPAD_RADIUS" in feat_idx and "PITCH" in feat_idx)
+    if lambda_mfg > 0 and not can_mfg:
+        print("  [warn] --lambda-mfg set but ANTIPAD_RADIUS/PITCH not in "
+              "local_features; manufacturability penalty DISABLED")
 
     # ---- frozen models -------------------------------------------------------
     fwd = DirectSequenceResNet(d_local=d_local, d_global=xg.shape[1],
@@ -628,6 +680,13 @@ def run_yield_tto(sample_idx, tto_steps=150, lr=0.05, restarts=12,
             loss = (weighted_s_loss(fwd(x_dec, xg, xc, freqs_hz), S_tgt, wm)
                     + lambda_prior * z.pow(2).sum()
                     + lambda_bnd * boundary_loss(x_dec))
+
+            # ---- manufacturability: forbid antipad/pitch overlap ------------
+            # (keeps the search inside geometrically BUILDABLE designs; without
+            #  it, yield-driven antipad inflation can push 2*antipad past pitch)
+            if lambda_mfg > 0 and can_mfg:
+                loss = loss + lambda_mfg * manufacturability_penalty(
+                    x_dec, feat_idx, feat_mean, feat_std, clearance=mfg_clearance)
 
             # ---- the robustness term: three mutually exclusive formulations --
             if mode == "variance" and lambda_j > 0:
@@ -832,6 +891,13 @@ def main():
                     help="global multiplier on the active tolerance model. "
                          "SENSITIVITY STUDY: repeat headline runs at 0.5 and "
                          "2.0 to show the ranking is sigma-independent")
+    ap.add_argument("--lambda-mfg", type=float, default=10.0,
+                    help="weight of the manufacturability penalty that forbids "
+                         "antipad/pitch overlap (2*antipad < pitch). Set 0 to "
+                         "disable. Default 10 (strong: geometry must be buildable)")
+    ap.add_argument("--mfg-clearance", type=float, default=1.0,
+                    help="safety gap in mil so designs sit strictly inside the "
+                         "antipad-pitch limit rather than exactly on it")
     ap.add_argument("--curriculum", action="store_true")
     ap.add_argument("--tol-frac", type=float, default=0.10,
                     help="1-sigma tolerance as a fraction of population std")
@@ -865,7 +931,8 @@ def main():
                       spec_rl_max=args.spec_rl_max, fit_gate=args.fit_gate,
                       mode=args.mode, lambda_cc=args.lambda_cc,
                       eps=args.eps, n_cc=args.n_cc,
-                      tol_model=args.tol_model, tol_scale=args.tol_scale)
+                      tol_model=args.tol_model, tol_scale=args.tol_scale,
+                      lambda_mfg=args.lambda_mfg, mfg_clearance=args.mfg_clearance)
 
 
 if __name__ == "__main__":

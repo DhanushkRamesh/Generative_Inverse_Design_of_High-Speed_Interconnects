@@ -1,8 +1,16 @@
 """
-tto_yield_inverse.py
+tto_yield_inverse_v3.py
 --------------------------------------------------
 YIELD-AWARE latent-space TTO with a RANKED design portfolio.
 The final methodological stage of the inverse-design pipeline (B3).
+
+V3 = V2 + THE TOLERANCE-MODEL SUBSYSTEM
+  v2 added the three robustness formulations (--mode variance|chance|worstcase)
+  after the lambda_j sweep measured the variance proxy collapsing yield
+  49% -> 2%. v3 adds the thing every yield number is conditional on: a
+  DEFENSIBLE tolerance model (--tol-model ipc|nominal|dataset) with a
+  sensitivity-study multiplier (--tol-scale). See the TOLERANCE MODELS
+  section and PartC_Yield_Plan_v3.md for the full justification.
 
 WHAT THIS ADDS ON TOP OF tto_latent_inverse.py
   1. A manufacturing TOLERANCE MODEL: per-parameter perturbation widths
@@ -247,6 +255,120 @@ def sensitivity_penalty(fwd, x, xg, xc, freqs_hz, sigma, w_bcast, S_nom=None):
 
 
 # =============================================================================
+# SPEC MARGINS (differentiable) -- the quantity the chance constraint bounds
+# =============================================================================
+def spec_margins(S, tgt21_db, eye_mask, spec_il_margin, spec_rl_max):
+    """Per-sample spec VIOLATION margins, differentiable, in dB.
+
+    Returns (g_il, g_rl), each shape (B,). A sample MEETS spec iff both are
+    <= 0. This is exactly the condition mc_yield() checks with hard
+    comparisons -- here expressed as a continuous margin so it has gradients
+    and so its mean/variance can be taken.
+
+        g_il = max_f [ (target_dB - spec_il_margin) - Sdd21_dB ]   over eye band
+        g_rl = max_f [ Sdd11_dB - spec_rl_max ]                    over eye band
+
+    The max over frequency encodes "must hold at EVERY eye-band frequency",
+    matching the .all(dim=1) in the MC estimator.
+    """
+    s21 = 20 * torch.log10(S[:, :, 1, 0].abs() + 1e-12)
+    s11 = 20 * torch.log10(S[:, :, 0, 0].abs() + 1e-12)
+    lo21 = (tgt21_db[eye_mask].view(1, -1) - spec_il_margin)
+    g_il = (lo21 - s21[:, eye_mask]).max(dim=1).values
+    g_rl = (s11[:, eye_mask] - spec_rl_max).max(dim=1).values
+    return g_il, g_rl
+
+
+def chance_penalty(fwd, x, xg, xc, freqs_hz, sigma, tgt21_db, eye_mask,
+                   spec_il_margin, spec_rl_max, eps=0.05, n_cc=64):
+    """CANTELLI chance-constraint penalty -- the term the variance proxy lacks.
+
+    THE PROBLEM WITH THE PURE SENSITIVITY PROXY (measured on this project):
+      sens(x) penalizes only how much S MOVES under perturbation. It contains
+      no information about WHERE S sits relative to the spec bound. At a
+      nominal design sitting ON the spec boundary (yield ~50%), there is no
+      margin for reduced variance to protect, so tightening the distribution
+      buys nothing -- and a strong penalty instead migrates the design toward
+      flat-but-failing regions at the edge of the manifold (observed:
+      max|x| 1.60 -> 2.02, yield 49% -> 2%).
+
+    THE FIX (Cui, Liu & Zhang, arXiv:1908.07574):
+      Enforce the chance constraint  P(g(x,xi) <= 0) >= 1 - eps  via Cantelli's
+      inequality, which converts it to a DETERMINISTIC, SMOOTH, sufficient
+      condition coupling mean AND standard deviation against the bound:
+
+          E[g] + kappa * sqrt(var[g]) <= 0,     kappa = sqrt((1-eps)/eps)
+
+      Any x satisfying this is guaranteed feasible for the original chance
+      constraint (it is a stronger condition, not an approximation of
+      convenience). kappa is the risk dial: eps=0.05 -> kappa=4.36, i.e. the
+      design must sit 4.36 sigma inside spec. THAT is what forces the mean
+      inward to create margin -- the thing the variance proxy never asks for.
+
+    IMPLEMENTATION
+      E[g] and var[g] are estimated by a REPARAMETERIZED MC batch
+      (x + sigma*randn stays in the autograd graph), so the whole penalty is
+      differentiable w.r.t. the latent z by ordinary backprop. n_cc=64 draws
+      in ONE batched forward pass; the gradient is noisy but unbiased, which
+      is standard for reparameterized stochastic objectives.
+
+      relu(.) makes the penalty EXACTLY ZERO inside the feasible set -- a
+      design that already has enough margin is not distorted.
+
+    Returns a scalar penalty (0 when both chance constraints are satisfied).
+    """
+    kappa = float(np.sqrt((1.0 - eps) / max(eps, 1e-9)))
+    b = n_cc
+    # reparameterization: delta is a differentiable function of nothing but
+    # noise; x carries the gradient, so d(penalty)/dz flows through x.
+    delta = torch.randn(b, x.shape[1], device=x.device) * sigma.view(1, -1)
+    Xp = x.repeat(b, 1) + delta
+    S = fwd(Xp, xg.repeat(b, 1), xc.repeat(b, 1), freqs_hz)
+    g_il, g_rl = spec_margins(S, tgt21_db, eye_mask, spec_il_margin, spec_rl_max)
+
+    pen = 0.0
+    for g in (g_il, g_rl):
+        mu = g.mean()
+        var = g.var(unbiased=False)
+        # Cantelli: mu + kappa*sd <= 0. Violation is the positive part.
+        viol = F.relu(mu + kappa * torch.sqrt(var + 1e-12))
+        pen = pen + viol.pow(2)
+    return pen
+
+
+def worstcase_penalty(fwd, x, xg, xc, freqs_hz, sigma, tgt21_db, eye_mask,
+                      spec_il_margin, spec_rl_max):
+    """WORST-CASE corner penalty -- the Wang/Lazarov/Sigmund (2011) baseline.
+
+    The canonical robust-design formulation evaluates a small set of extreme
+    realizations (there: eroded / intermediate / dilated density fields) and
+    optimizes the WORST case among them, giving "manufacturing tolerant
+    designs with little decrease in performance".
+
+    Transplanted here: the corners are the nominal design displaced by
+    +/- 1 sigma in each parameter (2d + 1 = 17 geometries, one batched forward
+    pass). The penalty is the worst spec violation over all corners.
+
+    This is included as an independent baseline: it is the method an examiner
+    will ask about, it needs no risk parameter, and it is deterministic (no MC
+    noise in the gradient). It is more conservative than the chance
+    constraint by construction -- worst-case is eps -> 0.
+    """
+    d = x.shape[1]
+    X = [x]
+    for i in range(d):
+        for s in (+1.0, -1.0):
+            xc_i = x.clone()
+            xc_i[0, i] = xc_i[0, i] + s * sigma[i]
+            X.append(xc_i)
+    X = torch.cat(X, dim=0)
+    n = X.shape[0]
+    S = fwd(X, xg.repeat(n, 1), xc.repeat(n, 1), freqs_hz)
+    g_il, g_rl = spec_margins(S, tgt21_db, eye_mask, spec_il_margin, spec_rl_max)
+    return F.relu(g_il.max()).pow(2) + F.relu(g_rl.max()).pow(2)
+
+
+# =============================================================================
 # MONTE-CARLO YIELD (evaluation metric -- through the surrogate)
 # =============================================================================
 @torch.no_grad()
@@ -282,12 +404,146 @@ def mc_yield(fwd, x, xg, xc, freqs_hz, sigma, S_tgt, eye_mask,
 
 
 # =============================================================================
+# TOLERANCE MODELS -- the definition of "manufacturing variation"
+# =============================================================================
+# Yield = P(spec | perturbation). The perturbation model is therefore HALF THE
+# DEFINITION OF YIELD: every number this script produces is conditional on it.
+# The TUHH database is solver-generated and contains NO fabrication
+# tolerances, so the model below is a CHOICE we make and state, not a fact we
+# retrieve. Three models are provided; the run tag records which was used.
+#
+#   ipc      (default) per-feature sigmas anchored in IPC acceptance limits
+#            and laminate-datasheet tolerances, converted via the standard
+#            process-capability convention  limit = 3*sigma  (Cpk = 1).
+#            NOTE (state in thesis): IPC publishes ACCEPTANCE LIMITS, not
+#            process sigmas. limit/3 is OUR stated conversion assumption.
+#   nominal  +/- tol_frac of the target sample's nominal value, uniformly.
+#            The literal reading of the proposal's "drill bit going 10% deep".
+#   dataset  tol_frac x population std (the original v1/v2 model). Kept for
+#            BACKWARD COMPATIBILITY: reproduces the measured negative result
+#            (yield 49% -> 2% under lambda_j) from this same script.
+#
+# --tol-scale multiplies whichever model is active: the SENSITIVITY-STUDY
+# knob. Repeating the headline comparison at 0.5x and 2x and showing the
+# ranking unchanged is the defense that makes the conclusion independent of
+# the exact sigma values -- which is the only defensible claim available,
+# since no "true" sigma exists for a synthetic dataset.
+#
+# Anchors (cite in thesis; see PartC_Yield_Plan_v3.md for sources):
+#   plated-hole diameter tolerance +/-3 mil (holes < 0.8 mm)  -> radius 1.5
+#   etch + layer registration allowance ~ +/-2 mil
+#   drill positional accuracy ~ +/-1 mil
+#   dielectric thickness +/-10% (standard), +/-5% (controlled)
+#   plating thickness variation ~ +/-10%
+#   laminate Dk tolerance ~ +/-2% (Megtron-class datasheets: +/-0.05 on ~3.6)
+#   laminate Df variation ~ +/-10% (resin content; Df varies more than Dk)
+#   copper conductivity +/-10% -- NO standards anchor; stated assumption.
+TOL_IPC = {
+    #  feature name    : (kind, value)   kind: "abs" = mil, "rel" = fraction
+    "VIA_RADIUS":     ("abs", 0.50),   # (3 mil dia limit)/2 /3
+    "ANTIPAD_RADIUS": ("abs", 0.67),   # 2 mil limit /3
+    "PITCH":          ("abs", 0.33),   # 1 mil positional limit /3
+    "TDIEL":          ("rel", 0.0333), # 10% limit /3
+    "TMET":           ("rel", 0.0333), # 10% limit /3
+    "PERMITTIVITY":   ("rel", 0.0067), # 2% limit /3
+    "CONDUCTIVITY":   ("rel", 0.0333), # 10% assumption /3
+    "LOSSTANGENT":    ("rel", 0.0333), # 10% limit /3
+}
+
+
+def build_sigma(payload, xl_true, tol_model, tol_frac, tol_scale, device):
+    """Construct the per-feature 1-sigma perturbation vector in NORMALIZED
+    feature units (the space the surrogate sees), plus a printable table.
+
+    Conversions (exact, not approximate):
+      linear feature, absolute tolerance a mil : sigma_norm = a / std
+      linear feature, relative tolerance r     : sigma_norm = r*|nominal| / std
+      log10  feature, relative tolerance r     : sigma_norm = log10(1+r) / std
+        (a +/-r relative perturbation of a positive quantity is EXACTLY a
+         +/-log10(1+r) shift of its log10 -- the correct perturbation in the
+         feature space the model was trained on)
+
+    Relative tolerances use the TARGET SAMPLE's nominal value and are FROZEN
+    for the whole run. The tolerance model must not depend on the candidate
+    design, or yield comparisons between candidates are incoherent.
+
+    Fails loudly on unknown feature names -- silent defaults would corrupt
+    every downstream yield number.
+    """
+    d_local = xl_true.shape[1]
+    local_names = list(payload.get("local_features", [f"x{i}" for i in range(d_local)]))
+    log_feats = set(payload.get("log_features", []))
+    Xstd = payload["X_local_std"]
+    Xstd = Xstd.cpu().numpy() if hasattr(Xstd, "cpu") else np.asarray(Xstd)
+    Xmean = payload["X_local_mean"]
+    Xmean = Xmean.cpu().numpy() if hasattr(Xmean, "cpu") else np.asarray(Xmean)
+    x_nom_norm = xl_true[0].detach().cpu().numpy()
+
+    sig = np.zeros(d_local, dtype=np.float64)
+    rows = []
+    for i, nm in enumerate(local_names):
+        std_i, mean_i = float(Xstd[i]), float(Xmean[i])
+        is_log = nm in log_feats
+        nominal_feat = x_nom_norm[i] * std_i + mean_i          # feature units
+        if tol_model == "dataset":
+            sig[i] = tol_frac
+            desc = f"{tol_frac:.2f} x pop-std"
+            phys = tol_frac * std_i
+            unit = "decades" if is_log else "feat-units"
+        elif tol_model == "nominal":
+            r = tol_frac
+            if is_log:
+                sig[i] = np.log10(1.0 + r) / std_i
+                phys, unit, desc = np.log10(1.0 + r), "decades", f"+/-{100*r:.0f}% rel"
+            else:
+                phys = abs(r * nominal_feat)
+                sig[i] = phys / std_i
+                unit, desc = "feat-units", f"+/-{100*r:.0f}% of nominal"
+        elif tol_model == "ipc":
+            if nm not in TOL_IPC:
+                raise KeyError(f"no IPC tolerance entry for feature {nm!r} -- "
+                               "add it to TOL_IPC (refusing to guess)")
+            kind, val = TOL_IPC[nm]
+            if kind == "abs":
+                if is_log:
+                    raise ValueError(f"{nm}: absolute tolerance on a log10 feature")
+                phys, unit, desc = val, "mil", f"abs {val:g} mil (limit/3)"
+                sig[i] = val / std_i
+            else:
+                if is_log:
+                    phys = np.log10(1.0 + val)
+                    unit, desc = "decades", f"rel +/-{100*val:.2g}% (limit/3)"
+                    sig[i] = phys / std_i
+                else:
+                    phys = abs(val * nominal_feat)
+                    unit, desc = "feat-units", f"rel +/-{100*val:.2g}% (limit/3)"
+                    sig[i] = phys / std_i
+        else:
+            raise ValueError(f"unknown tol_model {tol_model!r}")
+        sig[i] *= tol_scale
+        rows.append((nm, desc, phys * tol_scale, unit, sig[i]))
+
+    print(f"\n  TOLERANCE MODEL [{tol_model}] x scale {tol_scale:g} "
+          f"(1-sigma perturbations; limit=3*sigma Cpk=1 convention for 'ipc'):")
+    for nm, desc, phys, unit, sn in rows:
+        print(f"    {nm:>16s} : {desc:<26s} sigma_phys={phys:.4g} {unit:<10s} "
+              f"sigma_norm={sn:.4f}")
+    if tol_model == "ipc":
+        print("  (IPC gives ACCEPTANCE LIMITS, not process sigmas; limit/3 is a "
+              "stated Cpk=1 assumption. CONDUCTIVITY entry is an engineering "
+              "assumption with no standards anchor. See PartC_Yield_Plan_v3.md.)")
+    return torch.tensor(sig, dtype=torch.float32, device=device)
+
+
+# =============================================================================
 # MAIN PER-TARGET ROUTINE
 # =============================================================================
 def run_yield_tto(sample_idx, tto_steps=150, lr=0.05, restarts=12,
                   lambda_prior=1e-3, lambda_bnd=1e-2, lambda_j=0.1,
                   curriculum=False, tol_frac=0.10, n_mc=2000,
                   spec_il_margin=1.0, spec_rl_max=-8.0, fit_gate=3.0,
+                  mode="chance", lambda_cc=1.0, eps=0.05, n_cc=64,
+                  tol_model="ipc", tol_scale=1.0,
                   seed=0):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     torch.manual_seed(seed)
@@ -306,21 +562,9 @@ def run_yield_tto(sample_idx, tto_steps=150, lr=0.05, restarts=12,
     S_tgt = torch.complex(payload["Y_real"][sample_idx:sample_idx + 1].to(torch.float64),
                           payload["Y_imag"][sample_idx:sample_idx + 1].to(torch.float64)).to(device)
 
-    # ---- tolerance model: sigma in NORMALIZED units + printed physical map --
+    # ---- tolerance model: per-feature sigma via the selected model ----------
     d_local = xl_true.shape[1]
-    sigma = torch.full((d_local,), tol_frac, device=device)
-    local_names = list(payload.get("local_features", [f"x{i}" for i in range(d_local)]))
-    log_feats = set(payload.get("log_features", []))
-    Xstd = payload["X_local_std"]
-    Xstd = Xstd.cpu().numpy() if hasattr(Xstd, "cpu") else np.asarray(Xstd)
-    print("\n  TOLERANCE MODEL (1-sigma perturbations, normalized units = "
-          f"{tol_frac:.2f} x population std):")
-    for i, nm in enumerate(local_names):
-        phys = tol_frac * float(Xstd[i])
-        unit = "decades (log10 feature -> relative)" if nm in log_feats else "physical units"
-        print(f"    {nm:>16s} : sigma_norm={tol_frac:.2f} -> sigma_phys={phys:.4g} {unit}")
-    print("  (edit --tol-frac globally now; per-feature IPC-based sigmas are a"
-          " one-dict change for the thesis)")
+    sigma = build_sigma(payload, xl_true, tol_model, tol_frac, tol_scale, device)
 
     # ---- frozen models -------------------------------------------------------
     fwd = DirectSequenceResNet(d_local=d_local, d_global=xg.shape[1],
@@ -341,9 +585,33 @@ def run_yield_tto(sample_idx, tto_steps=150, lr=0.05, restarts=12,
     tgt21_db = 20 * torch.log10(S_tgt[0, :, 1, 0].abs() + 1e-12)
     tgt11_db = 20 * torch.log10(S_tgt[0, :, 0, 0].abs() + 1e-12)
 
-    tag = f"yield_L{lambda_j:g}" + ("_curr" if curriculum else "")
+    # ---- run tag encodes the FORMULATION, so sweeps never overwrite ---------
+    if mode == "variance":
+        tag = f"var_L{lambda_j:g}"
+        detail = f"lambda_j={lambda_j}  [ABLATION: variance proxy]"
+    elif mode == "chance":
+        kappa = float(np.sqrt((1.0 - eps) / max(eps, 1e-9)))
+        tag = f"cc_e{eps:g}_L{lambda_cc:g}"
+        detail = (f"eps={eps} -> kappa={kappa:.2f}  lambda_cc={lambda_cc}  "
+                  f"[Cantelli chance constraint]")
+    elif mode == "worstcase":
+        tag = f"wc_L{lambda_cc:g}"
+        detail = f"lambda_cc={lambda_cc}  [Wang/Sigmund worst-case corners]"
+    else:
+        raise ValueError(f"unknown mode {mode!r}")
+    tag += ("_curr" if curriculum else "")
+    # tolerance-model suffix: every output file is self-describing, and sweeps
+    # under different sigma models can never overwrite each other
+    tm_tag = {"ipc": "ipc", "nominal": f"nom{tol_frac:g}", "dataset": "ds"}[tol_model]
+    if tol_scale != 1.0:
+        tm_tag += f"_s{tol_scale:g}"
+    tag += f"_{tm_tag}"
+
     print(f"\n=== YIELD TTO [{tag}] sample {sample_idx}: {restarts} restarts x "
-          f"{tto_steps} steps, lambda_j={lambda_j} ===")
+          f"{tto_steps} steps")
+    print(f"    {detail}")
+    print(f"    spec: eye-band IL >= target-{spec_il_margin} dB, "
+          f"RL <= {spec_rl_max} dB | tol_frac={tol_frac}")
 
     # =========================================================================
     # RESTART LOOP -- every converged restart is a PORTFOLIO CANDIDATE
@@ -360,9 +628,26 @@ def run_yield_tto(sample_idx, tto_steps=150, lr=0.05, restarts=12,
             loss = (weighted_s_loss(fwd(x_dec, xg, xc, freqs_hz), S_tgt, wm)
                     + lambda_prior * z.pow(2).sum()
                     + lambda_bnd * boundary_loss(x_dec))
-            if lambda_j > 0:
+
+            # ---- the robustness term: three mutually exclusive formulations --
+            if mode == "variance" and lambda_j > 0:
+                # ORIGINAL proxy (Hoffman-style). Kept as the ablation arm:
+                # this is the formulation MEASURED to reduce sensitivity 41%
+                # while collapsing yield 49% -> 2%. Retained so the negative
+                # result is reproducible from the same script.
                 loss = loss + lambda_j * sensitivity_penalty(
                     fwd, x_dec, xg, xc, freqs_hz, sigma, w_bcast)
+            elif mode == "chance" and lambda_cc > 0:
+                # THE FIX: Cantelli chance constraint (mean + kappa*sd <= bound)
+                loss = loss + lambda_cc * chance_penalty(
+                    fwd, x_dec, xg, xc, freqs_hz, sigma, tgt21_db, eye_mask,
+                    spec_il_margin, spec_rl_max, eps=eps, n_cc=n_cc)
+            elif mode == "worstcase" and lambda_cc > 0:
+                # Wang/Lazarov/Sigmund 2011 baseline
+                loss = loss + lambda_cc * worstcase_penalty(
+                    fwd, x_dec, xg, xc, freqs_hz, sigma, tgt21_db, eye_mask,
+                    spec_il_margin, spec_rl_max)
+
             loss.backward()
             opt.step()
 
@@ -517,8 +802,36 @@ def main():
     ap.add_argument("--restarts", type=int, default=12)
     ap.add_argument("--lambda-prior", type=float, default=1e-3)
     ap.add_argument("--lambda-bnd", type=float, default=1e-2)
+    ap.add_argument("--mode", choices=["variance", "chance", "worstcase"],
+                    default="chance",
+                    help="robustness formulation. 'variance' = original "
+                         "sensitivity proxy (ABLATION: measured to collapse "
+                         "yield); 'chance' = Cantelli chance constraint (THE "
+                         "FIX); 'worstcase' = Wang/Sigmund corner baseline")
     ap.add_argument("--lambda-j", type=float, default=0.1,
-                    help="sensitivity (yield-proxy) weight; 0 = plain latent TTO")
+                    help="[mode=variance] sensitivity weight; 0 = plain latent TTO")
+    ap.add_argument("--lambda-cc", type=float, default=1.0,
+                    help="[mode=chance|worstcase] robustness-penalty weight; "
+                         "0 = plain latent TTO")
+    ap.add_argument("--eps", type=float, default=0.05,
+                    help="[mode=chance] risk level. kappa=sqrt((1-eps)/eps). "
+                         "eps=0.05 -> kappa=4.36 (design must sit 4.36 sigma "
+                         "inside spec). SWEEP THIS for the Pareto front.")
+    ap.add_argument("--n-cc", type=int, default=64,
+                    help="[mode=chance] reparameterized MC draws per step for "
+                         "the differentiable mean/variance estimate")
+    ap.add_argument("--tol-model", choices=["ipc", "nominal", "dataset"],
+                    default="ipc",
+                    help="tolerance model. 'ipc' = per-feature sigmas anchored "
+                         "in IPC acceptance limits / laminate datasheets "
+                         "(limit=3*sigma Cpk=1 convention, DEFAULT); 'nominal' "
+                         "= +/-tol-frac of each parameter's nominal value; "
+                         "'dataset' = tol-frac x population std (reproduces "
+                         "the v1/v2 negative-result numbers)")
+    ap.add_argument("--tol-scale", type=float, default=1.0,
+                    help="global multiplier on the active tolerance model. "
+                         "SENSITIVITY STUDY: repeat headline runs at 0.5 and "
+                         "2.0 to show the ranking is sigma-independent")
     ap.add_argument("--curriculum", action="store_true")
     ap.add_argument("--tol-frac", type=float, default=0.10,
                     help="1-sigma tolerance as a fraction of population std")
@@ -549,7 +862,10 @@ def main():
                       curriculum=args.curriculum, tol_frac=args.tol_frac,
                       n_mc=args.mc_samples,
                       spec_il_margin=args.spec_il_margin,
-                      spec_rl_max=args.spec_rl_max, fit_gate=args.fit_gate)
+                      spec_rl_max=args.spec_rl_max, fit_gate=args.fit_gate,
+                      mode=args.mode, lambda_cc=args.lambda_cc,
+                      eps=args.eps, n_cc=args.n_cc,
+                      tol_model=args.tol_model, tol_scale=args.tol_scale)
 
 
 if __name__ == "__main__":
