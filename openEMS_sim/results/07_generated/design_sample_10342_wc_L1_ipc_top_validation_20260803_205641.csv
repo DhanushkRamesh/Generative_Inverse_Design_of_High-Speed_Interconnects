@@ -1,0 +1,17 @@
+case,comparison,trace,band,mean_dB,mean_dB_floored,mean_linear
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd11,0-14,15.079,11.031,0.1088
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd11,14-28,2.13,2.13,0.0253
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd11,28-56,5.869,5.869,0.0909
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd11,56-100,1.846,1.846,0.0274
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd21,0-14,1.585,1.585,0.1658
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd21,14-28,2.051,2.051,0.1972
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd21,28-56,1.452,1.452,0.1084
+design_sample_10342_wc_L1_ipc_top,openems_vs_target,Sdd21,56-100,2.055,2.055,0.1255
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd11,0-14,16.026,11.489,0.1125
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd11,14-28,2.377,2.377,0.0278
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd11,28-56,5.93,5.93,0.0922
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd11,56-100,1.981,1.981,0.0261
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd21,0-14,1.629,1.629,0.1708
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd21,14-28,2.315,2.315,0.2262
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd21,28-56,1.494,1.494,0.1177
+design_sample_10342_wc_L1_ipc_top,openems_vs_pred,Sdd21,56-100,2.114,2.114,0.1279

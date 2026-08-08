@@ -1,0 +1,91 @@
+==============================================================================
+Stage 07: design_sample_2337_wc_L1_ipc_top  (template sim_pkg_2005, pair 6, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_2337_wc_L1_ipc_top] ---
+    via_radius   = 10.442 mil
+    antipad_rad  = 22.819 mil
+    pitch        = 56.232 mil
+    TDIEL/TMET   = 175.4 total, eps_r=3.506, tan_d=0.0155
+    n_ports      = 44
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+  building + simulating in OpenEMS (44 ports) ...
+  ArrayModelBuilder v4 (CoaxialPort) for generated_from_sim_pkg_2005
+    board (mil) : x[-56.2,337.4] y[-56.2,393.6] z[0,175.4]
+    domain (mil): z[-100.0,275.4] (coax stubs of 100 mil above/below)
+    coax launch : r_i=10.442 r_o=22.819 (air, Z0 ~ 47 ohm; renormalized to 50 ohm on output)
+    mesh res    : 3.152 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z PML_8
+    n_ports     : 44
+    [excite port 1/44]
+    [excite port 2/44]
+    [excite port 3/44]
+    [excite port 4/44]
+    [excite port 5/44]
+    [excite port 6/44]
+    [excite port 7/44]
+    [excite port 8/44]
+    [excite port 9/44]
+    [excite port 10/44]
+    [excite port 11/44]
+    [excite port 12/44]
+    [excite port 13/44]
+    [excite port 14/44]
+    [excite port 15/44]
+    [excite port 16/44]
+    [excite port 17/44]
+    [excite port 18/44]
+    [excite port 19/44]
+    [excite port 20/44]
+    [excite port 21/44]
+    [excite port 22/44]
+    [excite port 23/44]
+    [excite port 24/44]
+    [excite port 25/44]
+    [excite port 26/44]
+    [excite port 27/44]
+    [excite port 28/44]
+    [excite port 29/44]
+    [excite port 30/44]
+    [excite port 31/44]
+    [excite port 32/44]
+    [excite port 33/44]
+    [excite port 34/44]
+    [excite port 35/44]
+    [excite port 36/44]
+    [excite port 37/44]
+    [excite port 38/44]
+    [excite port 39/44]
+    [excite port 40/44]
+    [excite port 41/44]
+    [excite port 42/44]
+    [excite port 43/44]
+    [excite port 44/44]
+    [renorm] analytic coax Z = 25.0 ohm -> 50 ohm
+  saved design_sample_2337_wc_L1_ipc_top_openems_se.npz
+
+==============================================================================
+STAGE 07 RESULT  (mean floored dB, eye band)
+==============================================================================
+  [openems_vs_target]
+    Sdd11  0-14    floored=  5.92 dB  lin=0.1285
+    Sdd11  14-28   floored= 16.91 dB  lin=0.4342
+    Sdd21  0-14    floored=  0.60 dB  lin=0.0622
+    Sdd21  14-28   floored=  1.44 dB  lin=0.1140
+  [openems_vs_pred]
+    Sdd11  0-14    floored=  5.58 dB  lin=0.1217
+    Sdd11  14-28   floored= 17.29 dB  lin=0.4372
+    Sdd21  0-14    floored=  0.85 dB  lin=0.0888
+    Sdd21  14-28   floored=  1.54 dB  lin=0.1223
+
+  figure: design_sample_2337_wc_L1_ipc_top_overlay_20260802_122203.png
+  table : design_sample_2337_wc_L1_ipc_top_validation_20260802_122203.csv
+
+INTERPRETATION:
+  openems_vs_target small  -> the design achieves its goal in real
+     physics: the inverse model works. THE thesis result.
+  openems_vs_pred within the stage-06 solver floor -> the forward
+     surrogate was honest about this design.
+  openems_vs_pred >> floor (esp. where TTO optimised) -> surrogate
+     exploitation, caught in independent physics. Motivates latent TTO.

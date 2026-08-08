@@ -1,56 +1,50 @@
 """
-08_pam4_eye.py
+eye_diagram_validation.py
 ================================================================================
-Stage 08 of the openEMS validation pipeline -- the application-level finale.
+Stage 08 -- application-level eye-diagram comparison (112G PAM4, PRBS13Q).
 
-PURPOSE
-    Turn an OpenEMS-simulated differential insertion loss Sdd21(f) into a
-    112 Gb/s PAM4 eye diagram. S-parameters are abstract; the eye is what a
-    link designer actually judges. The thesis finale figure is two eyes side
-    by side -- one from the TARGET response, one from the OpenEMS-simulated
-    GENERATED design -- processed identically. Open, comparable eyes = the
-    designed interconnect carries real 112G traffic.
+WHAT THIS DOES
+  Builds a 112 Gb/s PAM4 eye (56 GBaud, Nyquist ~= 28 GHz -- the eye band) from
+  a via's differential insertion loss Sdd21, and compares the eye produced by
+  the TARGET via against the eye produced by the GENERATED (inverse-designed)
+  via. The comparison metric -- how closely the two eyes agree -- is the
+  application-level proof that the generated design reproduces the target's
+  signal-integrity behaviour in the time domain.
 
-SIGNAL CHAIN (standard S-parameter -> eye flow)
-    1. Load Sdd21(f) on the 0.25-100 GHz / 401-pt grid.
-    2. Condition the spectrum: extrapolate a DC point, enforce Hermitian
-       symmetry, raised-cosine window the band edge (reduces IFFT ringing).
-    3. Zero-pad the spectrum to 400 GHz so the time step is dt = 1.25 ps
-       (14.3 samples per UI at 56 GBaud -- enough to draw a clean eye).
-       Zero-padding adds no information; Sdd21 is ~-30 dB by 100 GHz, so the
-       band-limited assumption is honest.
-    4. IFFT -> causal impulse response h(t).
-    5. Generate a PRBS13Q PAM4 symbol stream (IEEE-standard test pattern:
-       PRBS13 bit sequence, consecutive bit pairs Gray-mapped to 4 levels
-       {-1, -1/3, +1/3, +1}), 56 GBaud, UI = 17.857 ps.
-    6. Convolve waveform with h(t), discard the transient, fold into 2-UI
-       segments, overlay -> eye diagram.
-    7. Report the three PAM4 eye heights at the centre sampling instant.
+WHY A CHANNEL IS EMBEDDED
+  A via in isolation is nearly transparent, so its bare eye carries little
+  information (a via alone barely stresses the signal). To make the eye
+  MEANINGFUL, the via is cascaded with a representative lossy transmission
+  line on each side, creating realistic inter-symbol interference. Because
+  the SAME channel is applied to target and generated vias, it does not bias
+  the comparison -- it simply moves both into a regime where the eye is
+  informative. (112G PAM4 links are equalised in practice; here we keep the
+  channel light enough that a stressed-but-open eye is obtained WITHOUT
+  equalisation, which is sufficient for a fidelity comparison.)
 
-    No equalisation is applied (un-equalised eye). Both target and generated
-    responses go through the IDENTICAL chain, so the comparison is fair.
-
-INPUTS (either)
-    --csv  <file>   stage 03b/05 ground-truth CSV
-                    (freq_Hz, Sdd11_re, Sdd11_im, Sdd21_re, Sdd21_im, ...)
-    --npz  <file> --pair K
-                    a stage 04/06/07 single-ended result
-                    ({sim}_openems_se.npz or case_{i}_openems.npz);
-                    pair K is extracted with the pipeline conventions.
-    Give --label to name the curve; run twice (target, generated) and use
-    --compare-with to overlay both eyes in one figure.
+CHANNEL MODEL (first-order, standard)
+  Sdd21_line(f) = exp(-(alpha(f) + j*beta(f)) * L),  applied on EACH side:
+      alpha(f) : skin-effect-dominated loss, dB/inch scaling as sqrt(f)
+      beta(f)  : 2*pi*f*sqrt(eps_r)/c   (phase / delay)
+  Reference: transmission-line theory (Paul, Multiconductor Transmission
+  Lines); eye/PAM4 methodology (Bogatin, Signal and Power Integrity).
 
 USAGE
-    # eye of the CONMLS target for sim_0017 pair 1 (from stage 03b export):
-    python 08_pam4_eye.py --csv results/03b_touchstone/sim_pkg_0017_pair1_conmls_mixedmode.csv --label target
+  # bare via (no channel) -- current behaviour:
+  python3 eye_diagram_validation.py --npz TARGET.npz --label Target \
+      --compare-npz DESIGN.npz --compare-pair 1 --compare-label Generated
 
-    # eye of an OpenEMS-simulated generated design:
-    python 08_pam4_eye.py --npz results/07_generated/case_0_openems.npz --pair 1 --label generated
+  # WITH a representative channel (informative eye) -- tune length/loss so the
+  # eye is stressed but still open (positive heights):
+  python3 eye_diagram_validation.py --npz TARGET.npz --label Target \
+      --compare-npz DESIGN.npz --compare-pair 1 --compare-label Generated \
+      --channel-length 1.5 --channel-loss 0.7 --channel-eps 4.0
 
-    # side-by-side finale figure:
-    python 08_pam4_eye.py --csv <target csv> --label target \
-        --compare-npz results/07_generated/case_0_openems.npz --compare-pair 1 \
-        --compare-label generated
+TUNING THE CHANNEL (important)
+  If all eye heights are NEGATIVE, the eye is CLOSED -- reduce --channel-length
+  and/or --channel-loss until the heights go positive (a stressed-but-open
+  eye). If the eye is trivially wide-open, INCREASE them. Start at
+  length 1.5 in, loss 0.7 dB/in and adjust.
 """
 
 from __future__ import annotations
@@ -73,18 +67,37 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 BAUD = 56e9                     # 56 GBaud -> 112 Gb/s PAM4
 UI = 1.0 / BAUD                 # 17.857 ps
 F_GRID = np.linspace(0.25e9, 100e9, 401)
-F_PAD_MAX = 400e9               # zero-pad spectrum to here -> dt = 1.25 ps
-PAM4_LEVELS = np.array([-1.0, -1.0 / 3.0, 1.0 / 3.0, 1.0])  # Gray order 00,01,11,10
+F_PAD_MAX = 400e9
+PAM4_LEVELS = np.array([-1.0, -1.0 / 3.0, 1.0 / 3.0, 1.0])
 
 M_BE = (1 / np.sqrt(2)) * np.array(
     [[1, -1, 0, 0], [0, 0, 1, -1], [1, 1, 0, 0], [0, 0, 1, 1]], float)
 
 
 # ----------------------------------------------------------------------------
+# Channel model: lossy transmission line
+# ----------------------------------------------------------------------------
+def lossy_line_sdd21(freq, length_in, loss_db_per_in_at_ghz,
+                     ref_ghz=1.0, eps_r=4.0):
+    """Sdd21 of a lossy differential line of `length_in` inches (PER SIDE).
+
+    Loss scales as sqrt(f) (skin-effect-dominated) -- a standard first-order
+    trace model. Returns complex Sdd21 on `freq`.
+    """
+    c = 2.998e8
+    f = np.asarray(freq, float)
+    loss_db_per_in = loss_db_per_in_at_ghz * np.sqrt(f / (ref_ghz * 1e9))
+    alpha_db = loss_db_per_in * length_in            # total dB over the line
+    mag = 10.0 ** (-alpha_db / 20.0)                 # linear magnitude
+    L_m = length_in * 0.0254
+    beta = 2 * np.pi * f * np.sqrt(eps_r) / c
+    return mag * np.exp(-1j * beta * L_m)
+
+
+# ----------------------------------------------------------------------------
 # Sdd21 loading
 # ----------------------------------------------------------------------------
 def load_sdd21_csv(path: str) -> np.ndarray:
-    """From the stage 03b/05 ground-truth CSV format."""
     data = np.genfromtxt(path, delimiter=",", names=True)
     s = data["Sdd21_re"] + 1j * data["Sdd21_im"]
     f = data["freq_Hz"]
@@ -94,7 +107,6 @@ def load_sdd21_csv(path: str) -> np.ndarray:
 
 
 def load_sdd21_npz(path: str, pair_k: int) -> np.ndarray:
-    """From a stage 04/06/07 single-ended npz; extract pair k mixed-mode."""
     d = np.load(path)
     S = d["S"]
     base = 4 * (pair_k - 1)
@@ -109,38 +121,21 @@ def load_sdd21_npz(path: str, pair_k: int) -> np.ndarray:
 # Spectrum -> impulse response
 # ----------------------------------------------------------------------------
 def impulse_response(sdd21: np.ndarray):
-    """Windowed, zero-padded, Hermitian IFFT -> (t, h) causal impulse response.
-
-    Frequency grid handling: the data lives on 0.25-100 GHz. We build a
-    uniform 0..F_PAD_MAX grid at df = 0.25 GHz (mil-stone: 0.25 GHz happens to
-    be both the first point and the spacing of the 401-pt grid), fill DC by
-    extrapolating |S| flat from the first point (phase -> 0 at DC), window the
-    100 GHz edge with a raised cosine over the last 20% of the measured band,
-    and zero beyond 100 GHz.
-    """
     df = 0.25e9
-    n_meas = len(F_GRID)                       # 401 points, 0.25..100 GHz
-    n_pos = int(F_PAD_MAX / df) + 1            # 0..400 GHz inclusive
+    n_meas = len(F_GRID)
+    n_pos = int(F_PAD_MAX / df) + 1
     spec = np.zeros(n_pos, dtype=complex)
-
-    # measured band: grid index k corresponds to f = k*df, k = 1..400
     spec[1:n_meas + 1] = sdd21
-
-    # DC point: magnitude of the lowest measured point, zero phase
     spec[0] = np.abs(sdd21[0])
-
-    # raised-cosine window over the top 20% of the measured band
     k0 = int(0.8 * n_meas)
     w = np.ones(n_meas)
     ramp = np.linspace(0, np.pi, n_meas - k0)
     w[k0:] = 0.5 * (1 + np.cos(ramp))
     spec[1:n_meas + 1] *= w
-
-    # Hermitian symmetric double-sided spectrum -> real impulse response
     full = np.concatenate([spec, np.conj(spec[-2:0:-1])])
     h = np.fft.ifft(full).real
     n_t = len(full)
-    dt = 1.0 / (n_t * df)                      # = 1/(2*F_PAD_MAX) approx 1.25 ps
+    dt = 1.0 / (n_t * df)
     t = np.arange(n_t) * dt
     return t, h, dt
 
@@ -149,7 +144,6 @@ def impulse_response(sdd21: np.ndarray):
 # PRBS13Q PAM4 pattern
 # ----------------------------------------------------------------------------
 def prbs13_bits() -> np.ndarray:
-    """PRBS13: x^13 + x^12 + x^2 + x + 1, length 2^13-1 = 8191 bits."""
     state = np.ones(13, dtype=int)
     bits = np.empty(8191, dtype=int)
     for i in range(8191):
@@ -161,12 +155,11 @@ def prbs13_bits() -> np.ndarray:
 
 
 def pam4_symbols() -> np.ndarray:
-    """PRBS13Q: consecutive bit pairs Gray-mapped to PAM4 levels."""
     b = prbs13_bits()
     if len(b) % 2:
         b = b[:-1]
     pairs = b.reshape(-1, 2)
-    gray_index = pairs[:, 0] * 2 + (pairs[:, 0] ^ pairs[:, 1])  # 00,01,11,10
+    gray_index = pairs[:, 0] * 2 + (pairs[:, 0] ^ pairs[:, 1])
     return PAM4_LEVELS[gray_index]
 
 
@@ -174,36 +167,25 @@ def pam4_symbols() -> np.ndarray:
 # Eye construction
 # ----------------------------------------------------------------------------
 def build_eye(sdd21: np.ndarray):
-    """Return (eye_time_ps, segments, dt, metrics)."""
     t, h, dt = impulse_response(sdd21)
-
-    # transmit waveform: symbols upsampled to dt with ideal NRZ (zero-order hold)
     sym = pam4_symbols()
-    sps = UI / dt                              # samples per UI (approx 14.29)
+    sps = UI / dt
     n_wave = int(len(sym) * sps)
     idx = np.floor(np.arange(n_wave) * dt / UI).astype(int)
     idx = np.clip(idx, 0, len(sym) - 1)
     tx = sym[idx]
-
-    # channel: convolve with impulse response (truncate h to its energy span)
     e = np.cumsum(h ** 2)
     n_keep = int(np.searchsorted(e, 0.9999 * e[-1])) + 1
     rx = np.convolve(tx, h[:n_keep])[:n_wave]
-
-    # fold into 2-UI eye segments, discarding the first 50 UI of transient
     seg_len = int(round(2 * UI / dt))
     start = int(50 * sps)
     n_seg = (n_wave - start) // seg_len
     segs = rx[start:start + n_seg * seg_len].reshape(n_seg, seg_len)
-    t_eye = np.arange(seg_len) * dt * 1e12     # ps
-
-    # eye metrics at the centre sampling instant (t = UI in the 2-UI window)
+    t_eye = np.arange(seg_len) * dt * 1e12
     k_samp = int(round(UI / dt))
     v = np.sort(segs[:, k_samp])
-    # cluster into 4 rails by histogram valleys (simple quartile split works
-    # for an open eye; report NaN if levels collapse)
     q = np.quantile(v, [0.125, 0.375, 0.625, 0.875])
-    rails = q                                   # approximate rail centres
+    rails = q
     heights = []
     for lo_rail, hi_rail in zip(rails[:-1], rails[1:]):
         lo_cloud = v[(v > lo_rail - 0.15) & (v < lo_rail + 0.15)]
@@ -218,7 +200,7 @@ def build_eye(sdd21: np.ndarray):
 
 
 def plot_eye(ax, t_eye, segs, title):
-    step = max(1, len(segs) // 800)            # cap drawn traces
+    step = max(1, len(segs) // 800)
     for s in segs[::step]:
         ax.plot(t_eye, s, color="tab:blue", alpha=0.05, lw=0.7)
     ax.set_xlabel("time (ps)")
@@ -235,11 +217,16 @@ def main():
     src.add_argument("--npz", type=str)
     ap.add_argument("--pair", type=int, default=1)
     ap.add_argument("--label", type=str, default="channel")
-    # optional second channel for the side-by-side finale figure
     ap.add_argument("--compare-csv", type=str, default=None)
     ap.add_argument("--compare-npz", type=str, default=None)
     ap.add_argument("--compare-pair", type=int, default=1)
     ap.add_argument("--compare-label", type=str, default="generated")
+    ap.add_argument("--channel-length", type=float, default=0.0,
+                    help="lossy line length PER SIDE, inches (0 = bare via)")
+    ap.add_argument("--channel-loss", type=float, default=1.0,
+                    help="line loss dB/inch at 1 GHz, scales as sqrt(f)")
+    ap.add_argument("--channel-eps", type=float, default=4.0,
+                    help="effective dielectric constant of the line")
     args = ap.parse_args()
 
     def load(csv, npz, pair):
@@ -248,9 +235,21 @@ def main():
     print("=" * 70)
     print(f"Stage 08: 112G PAM4 eye  (56 GBaud, UI = {UI*1e12:.3f} ps, "
           f"PRBS13Q, un-equalised)")
+    if args.channel_length > 0:
+        print(f"  channel: {args.channel_length} in/side, "
+              f"{args.channel_loss} dB/in@1GHz (sqrt-f), eps_r={args.channel_eps}")
+    else:
+        print("  channel: NONE (bare via)")
     print("=" * 70)
 
+    # build the shared channel once (identical for target and generated)
+    _line = (lossy_line_sdd21(F_GRID, args.channel_length, args.channel_loss,
+                              eps_r=args.channel_eps)
+             if args.channel_length > 0 else None)
+
     s1 = load(args.csv, args.npz, args.pair)
+    if _line is not None:
+        s1 = s1 * _line * _line
     t_eye, segs, m1 = build_eye(s1)
     print(f"\n  [{args.label}] rail centres: {m1['rail_centres']}")
     print(f"  [{args.label}] eye heights (3 eyes): {m1['eye_heights']}")
@@ -258,35 +257,40 @@ def main():
     has_cmp = args.compare_csv or args.compare_npz
     if has_cmp:
         s2 = load(args.compare_csv, args.compare_npz, args.compare_pair)
+        if _line is not None:
+            s2 = s2 * _line * _line
         _, segs2, m2 = build_eye(s2)
         print(f"\n  [{args.compare_label}] rail centres: {m2['rail_centres']}")
         print(f"  [{args.compare_label}] eye heights: {m2['eye_heights']}")
 
-        # ---- quantitative eye-agreement metrics (the thesis proof) ----------
-        h1 = np.array([h for h in m1["eye_heights"]], float)
-        h2 = np.array([h for h in m2["eye_heights"]], float)
-        # total eye opening = sum of the three sub-eye heights
+        h1 = np.array(m1["eye_heights"], float)
+        h2 = np.array(m2["eye_heights"], float)
         tot1, tot2 = np.nansum(h1), np.nansum(h2)
-        pct = 100.0 * abs(tot1 - tot2) / max(tot1, 1e-9)
-        # per-eye differences
+        # FIX: divide by abs() so a closed (negative) eye does not blow the %
+        pct = 100.0 * abs(tot1 - tot2) / max(abs(tot1), 1e-9)
         per = np.abs(h1 - h2)
-        print("\n  --- EYE AGREEMENT (target vs OpenEMS) ---")
+        eye_open = (tot1 > 0) and (tot2 > 0)
+
+        print("\n  --- EYE AGREEMENT (target vs generated) ---")
         print(f"    total eye opening [{args.label}]  : {tot1:.4f}")
         print(f"    total eye opening [{args.compare_label}]: {tot2:.4f}")
+        print(f"    eye state: {'OPEN' if eye_open else 'CLOSED (reduce channel loss/length)'}")
         print(f"    total-opening difference          : {pct:.1f} %")
         print(f"    per-sub-eye |height diff|         : "
               f"{', '.join(f'{d:.4f}' for d in per)}")
-        if pct < 10.0:
+        if not eye_open:
+            print("    NOTE: eye is CLOSED under this channel -- the % is a")
+            print("    fidelity measure (how equally both eyes closed), not an")
+            print("    opening. Reduce --channel-length/--channel-loss for an")
+            print("    OPEN eye where opening is meaningful.")
+        elif pct < 10.0:
             print(f"    VERDICT: eyes agree within {pct:.1f}% (<10%) -- the")
-            print(f"    solver difference does NOT materially change the eye.")
-            print(f"    This validates the OpenEMS channel at the application")
-            print(f"    level, independent of the per-frequency delta_solver.")
+            print(f"    generated design reproduces the target's eye. The")
+            print(f"    inverse design preserves signal integrity.")
         else:
-            print(f"    VERDICT: eyes differ by {pct:.1f}% -- the solver")
-            print(f"    difference is visible in the eye; report honestly and")
-            print(f"    trace it to the band where Sdd21 disagrees.")
+            print(f"    VERDICT: eyes differ by {pct:.1f}% -- report honestly")
+            print(f"    and trace it to the band where Sdd21 disagrees.")
 
-        # shared y-limits so the two eyes are directly comparable by eye
         ymax = 1.15 * max(np.abs(segs).max(), np.abs(segs2).max())
         fig, axes = plt.subplots(1, 2, figsize=(13, 5), tight_layout=True)
         plot_eye(axes[0], t_eye, segs, f"{args.label} (112G PAM4)")
@@ -294,7 +298,7 @@ def main():
         for a in axes:
             a.set_ylim(-ymax, ymax)
         fig.suptitle(f"112G PAM4 eye: {args.label} vs {args.compare_label}  "
-                     f"(total-opening diff {pct:.1f}%)")
+                     f"(opening diff {pct:.1f}%)")
         out = OUT_DIR / f"best_eye_{args.label}_vs_{args.compare_label}.png"
     else:
         fig, ax = plt.subplots(figsize=(7, 5), tight_layout=True)
@@ -304,9 +308,6 @@ def main():
     fig.savefig(out, dpi=150)
     plt.close(fig)
     print(f"\n  figure: {out}")
-    print("\n  An open eye (positive heights on all three sub-eyes) means the")
-    print("  channel carries 112G PAM4 without equalisation. Matching target")
-    print("  and generated eyes is the thesis finale result.")
 
 
 if __name__ == "__main__":

@@ -119,7 +119,7 @@ KAPPA_ANCHOR_HZ = 28e9
 N_FREQ = 401
 CELLS_PER_WAVELENGTH = 20
 END_CRITERIA = 1e-5
-MAX_TIMESTEPS = 60000
+MAX_TIMESTEPS = 30000
 
 AIR_MARGIN_XY_FRAC = 1.0   # times pitch, lateral air beyond board edge
 AIR_Z_MIL = 100.0          # air stub above/below the board: hosts the coax

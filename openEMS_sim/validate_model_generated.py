@@ -161,16 +161,6 @@ def three_metrics_rows(case, cmp_name, mm_a, mm_b):
 
 
 def main():
-    class _Tee:
-        def __init__(self, *s): self.s = s
-        def write(self, d):
-            for x in self.s: x.write(d); x.flush()
-        def flush(self):
-            for x in self.s: x.flush()
-    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    _log = open(_THIS_DIR / f"stage07_log_{stamp}.log", "w")
-    sys.stdout = _Tee(sys.__stdout__, _log)
-    sys.stderr = _Tee(sys.__stderr__, _log)
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--designs", required=True, help="design_sample_XX.npz")
@@ -182,10 +172,27 @@ def main():
                     help="validate the cVAE guess instead of the TTO geometry")
     ap.add_argument("--cells", type=int,
                     default=getattr(stage04, "CELLS_PER_WAVELENGTH", 20))
+    ap.add_argument("--mur", action="store_true",
+                     help="Pass --mur down to the array builder for Z-axis MUR")
     args = ap.parse_args()
 
+    case = Path(args.designs).stem#extract the case name from the designs file path
+
+    class _Tee:
+            def __init__(self, *s): self.s = s
+            def write(self, d):
+                for x in self.s: x.write(d); x.flush()
+            def flush(self):
+                for x in self.s: x.flush()
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # Save the log as: stage07_log_[DESIGN_NAME].log
+    log_name = f"stage07_log_{case}.log"
+    _log = open(_THIS_DIR / log_name, "w")
+    sys.stdout = _Tee(sys.__stdout__, _log)
+    sys.stderr = _Tee(sys.__stderr__, _log)
+
     d = np.load(args.designs, allow_pickle=True)
-    case = Path(args.designs).stem
     template = str(d["template_sim_id"][0])
     pair_k = int(d["pair_id"][0])
     which = "x_local_cvae" if args.use_cvae else "x_local_norm"
@@ -221,7 +228,7 @@ def main():
         S_oe = np.load(npz)["S"]
     else:
         print(f"\n  building + simulating in OpenEMS ({geo.n_ports} ports) ...")
-        builder = ArrayModelBuilder(geo, cells_per_wavelength=args.cells,
+        builder = ArrayModelBuilder(geo, cells_per_wavelength=args.cells, use_mur_z=args.mur,
                                     verbose=True)
         sim_root = _THIS_DIR / "runs" / f"07_{case}"
         freq, S_oe = builder.run_and_extract(sim_root, run=True)

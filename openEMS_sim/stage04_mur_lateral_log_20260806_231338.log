@@ -1,0 +1,56 @@
+==============================================================================
+Stage 04 v4 (CoaxialPort): build array model  (sim_pkg_9773)
+==============================================================================
+GeometryDescription  sim_id=sim_pkg_9773  source=sim_folder
+  via_radius   = 8.298 um
+  antipad_rad  = 18.767 um
+  pitch        = 58.649 um
+  TDIEL/TMET   = 68.353 / 1.319 um
+  eps_r        = 3.9521
+  sigma        = 4.987e+07 S/m
+  tan(delta)   = 0.02954
+  layers(metal)= 16  (stackup entries: 31)
+  grid         = 4 x 6
+  S/G/P vias   = 12/8/4  (total placed: 24)
+  n_ports      = 24  (6 diff pairs)
+  total_thick  = 533.75 um
+
+  ArrayModelBuilder v4 (CoaxialPort) for sim_pkg_9773
+    board (mil) : x[-58.6,234.6] y[-58.6,351.9] z[0,533.7]
+    domain (mil): z[-100.0,633.7] (coax stubs of 100 mil above/below)
+    coax launch : r_i=8.298 r_o=18.767 (air, Z0 ~ 49 ohm; renormalized to 50 ohm on output)
+    mesh res    : 2.969 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z MUR (fallback)
+    n_ports     : 24
+
+Full 16-port solve (est. ~8 min/port with the v4 mesh).
+
+    [excite port 1/24]
+    [excite port 2/24]
+    [excite port 3/24]
+    [excite port 4/24]
+    [excite port 5/24]
+    [excite port 6/24]
+    [excite port 7/24]
+    [excite port 8/24]
+    [excite port 9/24]
+    [excite port 10/24]
+    [excite port 11/24]
+    [excite port 12/24]
+    [excite port 13/24]
+    [excite port 14/24]
+    [excite port 15/24]
+    [excite port 16/24]
+    [excite port 17/24]
+    [excite port 18/24]
+    [excite port 19/24]
+    [excite port 20/24]
+    [excite port 21/24]
+    [excite port 22/24]
+    [excite port 23/24]
+    [excite port 24/24]
+    [renorm] analytic coax Z = 24.6 ohm -> 50 ohm
+
+Saved (50-ohm referenced, de-embedded to board surface):
+  /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/results/04_openems/sim_pkg_9773_mur_lateral_openems_se.npz
+Run stage 05 next.

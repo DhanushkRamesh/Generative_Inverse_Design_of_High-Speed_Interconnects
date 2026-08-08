@@ -1,0 +1,71 @@
+==============================================================================
+Stage 07: design_sample_11742_wc_L1_ipc_top  (template sim_pkg_9773, pair 6, geometry='x_local_norm')
+==============================================================================
+
+  --- geometry sanity check [design_sample_11742_wc_L1_ipc_top] ---
+    via_radius   = 7.987 mil
+    antipad_rad  = 20.025 mil
+    pitch        = 54.927 mil
+    TDIEL/TMET   = 538.1 total, eps_r=4.102, tan_d=0.0157
+    n_ports      = 24
+    geometry looks physical (via < antipad < pitch/2, eps_r>1).
+
+  building + simulating in OpenEMS (24 ports) ...
+  ArrayModelBuilder v4 (CoaxialPort) for generated_from_sim_pkg_9773
+    board (mil) : x[-54.9,219.7] y[-54.9,329.6] z[0,538.1]
+    domain (mil): z[-100.0,638.1] (coax stubs of 100 mil above/below)
+    coax launch : r_i=7.987 r_o=20.025 (air, Z0 ~ 55 ohm; renormalized to 50 ohm on output)
+    mesh res    : 2.914 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z MUR (fallback)
+    n_ports     : 24
+    [excite port 1/24]
+    [excite port 2/24]
+    [excite port 3/24]
+    [excite port 4/24]
+    [excite port 5/24]
+    [excite port 6/24]
+    [excite port 7/24]
+    [excite port 8/24]
+    [excite port 9/24]
+    [excite port 10/24]
+    [excite port 11/24]
+    [excite port 12/24]
+    [excite port 13/24]
+    [excite port 14/24]
+    [excite port 15/24]
+    [excite port 16/24]
+    [excite port 17/24]
+    [excite port 18/24]
+    [excite port 19/24]
+    [excite port 20/24]
+    [excite port 21/24]
+    [excite port 22/24]
+    [excite port 23/24]
+    [excite port 24/24]
+    [renorm] analytic coax Z = 27.2 ohm -> 50 ohm
+  saved design_sample_11742_wc_L1_ipc_top_openems_se.npz
+
+==============================================================================
+STAGE 07 RESULT  (mean floored dB, eye band)
+==============================================================================
+  [openems_vs_target]
+    Sdd11  0-14    floored=  9.14 dB  lin=0.1353
+    Sdd11  14-28   floored=  9.75 dB  lin=0.3025
+    Sdd21  0-14    floored=  1.29 dB  lin=0.1202
+    Sdd21  14-28   floored=  0.52 dB  lin=0.0240
+  [openems_vs_pred]
+    Sdd11  0-14    floored=  8.31 dB  lin=0.1228
+    Sdd11  14-28   floored=  9.89 dB  lin=0.3131
+    Sdd21  0-14    floored=  1.40 dB  lin=0.1334
+    Sdd21  14-28   floored=  1.15 dB  lin=0.0504
+
+  figure: design_sample_11742_wc_L1_ipc_top_overlay_20260808_160459.png
+  table : design_sample_11742_wc_L1_ipc_top_validation_20260808_160459.csv
+
+INTERPRETATION:
+  openems_vs_target small  -> the design achieves its goal in real
+     physics: the inverse model works. THE thesis result.
+  openems_vs_pred within the stage-06 solver floor -> the forward
+     surrogate was honest about this design.
+  openems_vs_pred >> floor (esp. where TTO optimised) -> surrogate
+     exploitation, caught in independent physics. Motivates latent TTO.

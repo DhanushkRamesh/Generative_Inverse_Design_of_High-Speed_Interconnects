@@ -1,0 +1,52 @@
+==============================================================================
+Stage 04 v4 (CoaxialPort): build array model  (sim_pkg_5844)
+==============================================================================
+GeometryDescription  sim_id=sim_pkg_5844  source=sim_folder
+  via_radius   = 9.368 um
+  antipad_rad  = 29.323 um
+  pitch        = 66.515 um
+  TDIEL/TMET   = 31.631 / 2.707 um
+  eps_r        = 4.6143
+  sigma        = 4.247e+07 S/m
+  tan(delta)   = 0.02655
+  layers(metal)= 12  (stackup entries: 23)
+  grid         = 3 x 6
+  S/G/P vias   = 10/8/0  (total placed: 18)
+  n_ports      = 20  (5 diff pairs)
+  total_thick  = 206.45 um
+
+  ArrayModelBuilder v4 (CoaxialPort) for sim_pkg_5844
+    board (mil) : x[-66.5,199.5] y[-66.5,399.1] z[0,206.4]
+    domain (mil): z[-100.0,306.4] (coax stubs of 100 mil above/below)
+    coax launch : r_i=9.368 r_o=29.323 (air, Z0 ~ 68 ohm; renormalized to 50 ohm on output)
+    mesh res    : 2.747 mil (20 cells/lambda @ 100 GHz)
+    boundaries  : lateral PML_8 (infinite planes), z MUR (fallback)
+    n_ports     : 20
+
+Full 16-port solve (est. ~8 min/port with the v4 mesh).
+
+    [excite port 1/20]
+    [excite port 2/20]
+    [excite port 3/20]
+    [excite port 4/20]
+    [excite port 5/20]
+    [excite port 6/20]
+    [excite port 7/20]
+    [excite port 8/20]
+    [excite port 9/20]
+    [excite port 10/20]
+    [excite port 11/20]
+    [excite port 12/20]
+    [excite port 13/20]
+    [excite port 14/20]
+    [excite port 15/20]
+    [excite port 16/20]
+    [excite port 17/20]
+    [excite port 18/20]
+    [excite port 19/20]
+    [excite port 20/20]
+    [renorm] analytic coax Z = 31.9 ohm -> 50 ohm
+
+Saved (50-ohm referenced, de-embedded to board surface):
+  /home/dhanushkramesh/mece_project_inverse_model/Generative_Inverse_Design_of_High-Speed_Interconnects/openEMS_sim/results/04_openems/sim_pkg_5844_mur_lateral_openems_se.npz
+Run stage 05 next.

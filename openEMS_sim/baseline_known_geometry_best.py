@@ -1,5 +1,5 @@
 """
-05_baseline_known.py  (v2 - weighted delta_solver + eye-critical view)
+baseline_known_geometry_best.py  (v2 - weighted delta_solver + eye-critical view)
 ================================================================================
 Stage 05 of the openEMS validation pipeline -- THE CRITICAL GATE.
 

@@ -480,8 +480,8 @@ TOL_IPC = {
     "TDIEL":          ("rel", 0.0333), # 10% limit /3
     "TMET":           ("rel", 0.0333), # 10% limit /3
     "PERMITTIVITY":   ("rel", 0.0067), # 2% limit /3
-    "CONDUCTIVITY":   ("rel", 0.0333), # 10% assumption /3
-    "LOSSTANGENT":    ("rel", 0.0333), # 10% limit /3
+    "CONDUCTIVITY":   ("rel", 0.02), # copper bulk conductivity is well-controlled and not a specified PCB tolerance; the dominant copper variation is plating thickness, captured separately by TMET.+/-2% reflects minor purity/temperature drift.
+    "LOSSTANGENT":    ("rel", 0.10), # Df (loss tangent) varies MORE than Dk and is driven by resin-content variation (Isola). It is not tightly toleranced on datasheets. Since Df directly drives the insertion-loss spec, we use a conservative +/-10% (applied directly, NOT limit/3, as this is a process-variation range not an acceptance limit).
 }
 
 
@@ -564,8 +564,10 @@ def build_sigma(payload, xl_true, tol_model, tol_frac, tol_scale, device):
               f"sigma_norm={sn:.4f}")
     if tol_model == "ipc":
         print("  (IPC gives ACCEPTANCE LIMITS, not process sigmas; limit/3 is a "
-              "stated Cpk=1 assumption. CONDUCTIVITY entry is an engineering "
-              "assumption with no standards anchor. See PartC_Yield_Plan_v3.md.)")
+              "stated Cpk=1 assumption. CONDUCTIVITY: +/-2% (copper is well-"
+              "controlled; plating variation captured by TMET). LOSSTANGENT: "
+              "+/-10% applied directly (Df process-variation range, resin-"
+              "content driven, not an acceptance limit). See tolerance model docs.)")
     return torch.tensor(sig, dtype=torch.float32, device=device)
 
 

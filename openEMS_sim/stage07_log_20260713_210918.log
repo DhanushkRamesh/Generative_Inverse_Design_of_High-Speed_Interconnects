@@ -1,3 +1,0 @@
-usage: validate_model_generated.py [-h] --designs DESIGNS [--check-only]
-                                   [--skip-run] [--use-cvae] [--cells CELLS]
-validate_model_generated.py: error: the following arguments are required: --designs
