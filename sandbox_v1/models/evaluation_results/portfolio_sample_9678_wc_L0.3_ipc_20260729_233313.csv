@@ -1,6 +1,0 @@
-rank,restart,fit_eye_dB,yield_pct,yield_lo,yield_hi,sensitivity,fit_full_loss,max_abs_xnorm,npz
-1,1,2.303,73.3,71.32,75.19,0.01214,0.029298,2.151,design_sample_9678_wc_L0.3_ipc_r01.npz
-2,3,2.428,69.25,67.19,71.23,0.013048,0.025165,2.137,design_sample_9678_wc_L0.3_ipc_r03.npz
-3,7,2.256,66.85,64.76,68.88,0.015457,0.028473,2.24,design_sample_9678_wc_L0.3_ipc_r07.npz
-4,4,2.64,65.1,62.98,67.16,0.013985,0.019444,2.041,design_sample_9678_wc_L0.3_ipc_r04.npz
-5,0,2.594,63.45,61.32,65.53,0.014671,0.020283,2.109,design_sample_9678_wc_L0.3_ipc_r00.npz

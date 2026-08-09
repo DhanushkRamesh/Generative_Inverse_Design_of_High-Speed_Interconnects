@@ -1,0 +1,13 @@
+rank,restart,fit_eye_dB,yield_pct,yield_lo,yield_hi,sensitivity,fit_full_loss,max_abs_xnorm,npz
+1,0,1.73,0.0,0.0,0.19,0.009641,0.009264,1.149,design_sample_441_var_L0_ipc_r00.npz
+2,1,1.73,0.0,0.0,0.19,0.009641,0.009264,1.149,design_sample_441_var_L0_ipc_r01.npz
+3,2,1.73,0.0,0.0,0.19,0.009636,0.009264,1.151,design_sample_441_var_L0_ipc_r02.npz
+4,3,1.73,0.0,0.0,0.19,0.009644,0.009264,1.151,design_sample_441_var_L0_ipc_r03.npz
+5,4,1.73,0.0,0.0,0.19,0.009646,0.009263,1.149,design_sample_441_var_L0_ipc_r04.npz
+6,5,1.729,0.0,0.0,0.19,0.009655,0.009273,1.144,design_sample_441_var_L0_ipc_r05.npz
+7,6,1.729,0.0,0.0,0.19,0.009676,0.009269,1.139,design_sample_441_var_L0_ipc_r06.npz
+8,7,1.729,0.0,0.0,0.19,0.009636,0.009264,1.148,design_sample_441_var_L0_ipc_r07.npz
+9,8,1.73,0.0,0.0,0.19,0.009657,0.009263,1.15,design_sample_441_var_L0_ipc_r08.npz
+10,9,1.729,0.0,0.0,0.19,0.009655,0.009267,1.141,design_sample_441_var_L0_ipc_r09.npz
+11,10,1.729,0.0,0.0,0.19,0.009638,0.009266,1.148,design_sample_441_var_L0_ipc_r10.npz
+12,11,1.729,0.0,0.0,0.19,0.009675,0.009265,1.144,design_sample_441_var_L0_ipc_r11.npz

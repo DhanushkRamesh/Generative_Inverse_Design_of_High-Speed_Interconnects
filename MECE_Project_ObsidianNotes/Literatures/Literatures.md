@@ -148,3 +148,39 @@ Keywords: [Tools;Databases;Electromagnetic compatibility;Integrated circuit inte
 URL: [openEMS – a free and open source equivalent‐circuit (EC) FDTD simulation platform supporting cylindrical coordinates suitable for the analysis of traveling wave MRI applications - Liebig - 2013 - International Journal of Numerical Modelling: Electronic Networks, Devices and Fields - Wiley Online Library](https://onlinelibrary.wiley.com/doi/10.1002/jnm.1875)
 
 Authors: Liebig, T., Rennings, A., Held, S. and Erni, D. (2013), openEMS – a free and open source equivalent-circuit (EC) FDTD simulation platform supporting cylindrical coordinates suitable for the analysis of traveling wave MRI applications. Int. J. Numer. Model., 26: 680-696. https://doi.org/10.1002/jnm.1875
+************
+K. A. Shila, "Computationally Efficient Design of an LNA Input Matching Network Using Automatic Differentiation," in IEEE Journal of Microwaves, vol. 5, no. 4, pp. 972-982, July 2025, doi: 10.1109/JMW.2025.3568779. keywords: {Noise;Optimization;Impedance matching;Finite difference methods;Machine learning;Stripline;Noise figure;Impedance;Computational efficiency;Transmission lines;Radio astronomy;Machine learning;non-uniform transmission lines;optimization;radio astronomy},
+port-finding logic
+
+Teledyne LeCroy, "Operator's Manual Eye Doctor II Software," which details the universal language of SI S-parameters and standard $N$-port block ordering for transmission line de-embedding.
+
+Touchstone® File Format Specification, Version 2.1, Ratified by the IBIS Open Forum January 26, 2024
+
+utils function references
+
+Mixed-Mode S-Parameters: Bockelman, D. E., & Eisenstadt, W. R. (1995). Combined Differential and Common-Mode Scattering Parameters: Theory and Simulation. IEEE Transactions on Microwave Theory and Techniques, 43(7), 1530-1539. Link (This is the original paper that defined the 'M' matrix used in your code).
+A. Ferrero and M. Pirola, "Generalized mixed-mode S-parameters," in IEEE Transactions on Microwave Theory and Techniques, vol. 54, no. 1, pp. 458-463, Jan. 2006, doi: 10.1109/TMTT.2005.860497. 
+
+Passivity and Causality: Triverio, P., Grivet-Talocia, S., Nakhla, M. S., Canavero, F. G., & Achar, R. (2007). Stability, Causality, and Passivity in Electrical Interconnect Models. IEEE Transactions on Advanced Packaging, 30(4), 795-808. Link (This paper justifies the $I - S^H S$ Eigenvalue check used to drop bad data).
+
+Pozar, D. M. (2011). Microwave Engineering (4th ed.). John Wiley & Sons. (Note: Use this textbook as the standard citation for the $b=Sa$ incident/reflected power wave derivations). passivity
+
+Reciprocity Theorem: Pozar, D. M. (2011). Microwave Engineering (4th ed.). John Wiley & Sons. (Chapter 4: Microwave Network Analysis). (This textbook justifies averaging the transpose matrix).
+
+DC Extrapolation for Neural Networks: Achar, R., & Nakhla, M. S. (2001). Simulation of High-Speed Interconnects. Proceedings of the IEEE, 89(5), 693-728. Link (Explains why DC operating points are critical for macromodeling and time-domain transitions).
+
+Fourier feature extraction
+
+M. Tancik et al., "Fourier Features Let Networks Learn High Frequency Functions in Low Dimensional Domains," NeurIPS, 2020.
+
+beta annealing
+S. R. Bowman et al., "Generating Sentences from a Continuous Space," arXiv:1511.06349, 2015.
+
+H. Fu et al., "Cyclical Annealing Schedule: A Simple Approach to Mitigating KL Vanishing," NAACL, 2019. | https://doi.org/10.48550/arXiv.1903.10145](https://doi.org/10.48550/arXiv.1903.10145)|
+
+Hessian
+1.      [Yucong Liu, Shixing Yu, Tong Lin, "Hessian regularization of deep neural networks: A novel approach based on stochastic estimators of Hessian trace", Neurocomputing, Volume 536, 2023, Pages 13-20, ISSN 0925-2312, https://doi.org/10.1016/j.neucom.2023.03.017.](https://www.sciencedirect.com/science/article/pii/S0925231223002515)
+
+Worst case hyper volume 
+Z. Chen et al., "Yield Optimization for Analog Circuits over Multiple Corners via Bayesian Neural Networks," ACM Transactions on Design Automation of Electronic Systems, vol. 30, 2024.
+

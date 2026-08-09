@@ -5,3 +5,5 @@ Via stub resonance is highly non-linear, but the Jacobian (first-order derivativ
 - optimize for multi-variable 3D manufacturing corners. Instead of optimizing for one tolerance, optimize for a "Worst-Case Hyper-Volume".
 - Eigenvalue passivity check in dataloader - to be executed now (after this verify openEMS and complete phase 1)
 
+## forward model -- check if physics-anchored initialization can be added first work on baseline. 
+

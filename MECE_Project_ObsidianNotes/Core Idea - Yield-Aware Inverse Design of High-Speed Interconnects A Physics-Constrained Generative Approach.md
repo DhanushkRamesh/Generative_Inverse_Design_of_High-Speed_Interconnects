@@ -36,3 +36,10 @@ Layer 4: Physics layer - Hard-Coded Telegraphers equation where we derive the s 
 
 ==**Inverse model**== - backpropogation from the forward model
 ******************
+
+Phase 1: Data Pipeline Complete
+
+Take the raw data params from the csv file --> compare the respective s-paramter in the touchstone file ---> data cleansing ---> matrix slicing ---> z-score normalization --> store in pythontensor file
+
+Phase 2: Forward Model (Rational Network)
+

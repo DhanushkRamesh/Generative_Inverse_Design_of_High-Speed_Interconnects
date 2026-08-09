@@ -1,0 +1,48 @@
+
+====================================================================
+  SAMPLE 260  lambda_j=0.1  curriculum=False
+====================================================================
+
+  TOLERANCE MODEL [ipc] x scale 1 (1-sigma perturbations; limit=3*sigma Cpk=1 convention for 'ipc'):
+          VIA_RADIUS : abs 0.5 mil (limit/3)      sigma_phys=0.5 mil        sigma_norm=0.1073
+      ANTIPAD_RADIUS : abs 0.67 mil (limit/3)     sigma_phys=0.67 mil        sigma_norm=0.1207
+               PITCH : abs 0.33 mil (limit/3)     sigma_phys=0.33 mil        sigma_norm=0.0386
+               TDIEL : rel +/-3.3% (limit/3)      sigma_phys=2.308 feat-units sigma_norm=0.1051
+                TMET : rel +/-3.3% (limit/3)      sigma_phys=0.0547 feat-units sigma_norm=0.0559
+        PERMITTIVITY : rel +/-0.67% (limit/3)     sigma_phys=0.01828 feat-units sigma_norm=0.0285
+        CONDUCTIVITY : rel +/-2% (limit/3)        sigma_phys=0.0086 decades    sigma_norm=0.1835
+         LOSSTANGENT : rel +/-10% (limit/3)       sigma_phys=0.04139 decades    sigma_norm=0.1021
+  (IPC gives ACCEPTANCE LIMITS, not process sigmas; limit/3 is a stated Cpk=1 assumption. CONDUCTIVITY: +/-2% (copper is well-controlled; plating variation captured by TMET). LOSSTANGENT: +/-10% applied directly (Df process-variation range, resin-content driven, not an acceptance limit). See tolerance model docs.)
+
+=== YIELD TTO [wc_L1_ipc] sample 260: 12 restarts x 150 steps
+    lambda_cc=1.0  [Wang/Sigmund worst-case corners]
+    spec: eye-band IL >= target-1.0 dB, RL <= -8.0 dB | tol_frac=0.1
+  restart 00 | eye-fit  0.85 dB | sens  0.00761 | yield  99.8% [99.5,99.9] | max|x| 0.87
+  restart 01 | eye-fit  0.85 dB | sens  0.00766 | yield  99.6% [99.1,99.8] | max|x| 0.87
+  restart 02 | eye-fit  0.85 dB | sens  0.00762 | yield  99.5% [99.0,99.7] | max|x| 0.87
+  restart 03 | eye-fit  0.85 dB | sens  0.00761 | yield  99.5% [99.0,99.7] | max|x| 0.87
+  restart 04 | eye-fit  0.85 dB | sens  0.00762 | yield  99.5% [99.1,99.7] | max|x| 0.88
+  restart 05 | eye-fit  0.83 dB | sens  0.00743 | yield  99.2% [98.8,99.5] | max|x| 0.90
+  restart 06 | eye-fit  0.84 dB | sens  0.00762 | yield  99.6% [99.2,99.8] | max|x| 0.88
+  restart 07 | eye-fit  0.85 dB | sens  0.00763 | yield  99.4% [98.9,99.6] | max|x| 0.88
+  restart 08 | eye-fit  0.85 dB | sens  0.00761 | yield  99.8% [99.4,99.9] | max|x| 0.88
+  restart 09 | eye-fit  0.85 dB | sens  0.00766 | yield  99.7% [99.3,99.9] | max|x| 0.87
+  restart 10 | eye-fit  0.85 dB | sens  0.00762 | yield  99.4% [99.0,99.7] | max|x| 0.87
+  restart 11 | eye-fit  0.87 dB | sens  0.00786 | yield  99.7% [99.3,99.9] | max|x| 0.82
+
+  fit gate (1.0 dB eye-band): 12/12 candidates pass
+  portfolio diversity: pairwise |dx| mean 0.289, max 1.454 (normalized units; ~0 would mean all restarts found the same design)
+
+======================================================================
+  RANKED PORTFOLIO (top 5)  sample 260  [wc_L1_ipc]
+======================================================================
+  rank eye-fit dB  yield %       sens file
+     1       0.85     99.8    0.00761 design_sample_260_wc_L1_ipc_r00.npz
+     2       0.85     99.8    0.00761 design_sample_260_wc_L1_ipc_r08.npz
+     3       0.85     99.7    0.00766 design_sample_260_wc_L1_ipc_r09.npz
+     4       0.87     99.7    0.00786 design_sample_260_wc_L1_ipc_r11.npz
+     5       0.84     99.6    0.00762 design_sample_260_wc_L1_ipc_r06.npz
+
+  csv    : portfolio_sample_260_wc_L1_ipc_20260806_001721.csv
+  pareto : pareto_sample_260_wc_L1_ipc_20260806_001721.png
+  top design (for stage 07): design_sample_260_wc_L1_ipc_top.npz
